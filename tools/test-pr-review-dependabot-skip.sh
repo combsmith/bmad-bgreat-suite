@@ -86,17 +86,29 @@ if guard is None:
 # Normalise whitespace and quotes so the assertion is robust to formatting.
 normalised = "".join(str(guard).split()).replace('"', "'")
 
-# Org-standard actor form: skips events triggered by Dependabot itself.
-actor_skip = (
-    "github.actor!='dependabot[bot]'" in normalised
-    or "'dependabot[bot]'!=github.actor" in normalised
-)
+# Strip an optional ${{ }} wrapper, then require the guard to be a pure
+# conjunction (&&) of terms where at least one term is exactly an accepted skip
+# form. Substring matching is not enough: a negated or OR-ed expression could
+# contain the expected text yet still let Dependabot jobs run.
+expr = normalised
+if expr.startswith("${{") and expr.endswith("}}"):
+    expr = expr[3:-2]
 
-# Stricter head-ref form: skips every event on a dependabot/* branch.
 head_ref = "startsWith(github.event.pull_request.head.ref,'dependabot/')"
-head_ref_skip = (
-    f"!{head_ref}" in normalised or f"not({head_ref})" in normalised
-)
+accepted_terms = {
+    "github.actor!='dependabot[bot]'",
+    "'dependabot[bot]'!=github.actor",
+    f"!{head_ref}",
+    f"not({head_ref})",
+}
+
+if "||" in expr:
+    terms = []
+else:
+    terms = expr.split("&&")
+
+actor_skip = any(t in accepted_terms for t in terms)
+head_ref_skip = actor_skip
 
 if not (actor_skip or head_ref_skip):
     if head_ref in normalised:
