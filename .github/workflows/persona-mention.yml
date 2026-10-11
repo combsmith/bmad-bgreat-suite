@@ -62,5 +62,5 @@ jobs:
                             # no more than the caller; persona-standards.md §5)
       issues: read
       pull-requests: read
-    uses: petry-projects/.github/.github/workflows/persona-mention-reusable.yml@persona-mention/v1-ring1  # NOSONAR(githubactions:S7637) first-party channel ref
+    uses: petry-projects/.github/.github/workflows/persona-mention-reusable.yml@persona-mention/v1-stable  # NOSONAR(githubactions:S7637) first-party channel ref
     secrets: inherit  # NOSONAR(githubactions:S7635) org secrets are scoped to first-party reusables
