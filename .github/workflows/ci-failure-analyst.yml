@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE OF TRUTH: petry-projects/.github-private/standards/workflows/ci-failure-analyst.yml
+# SOURCE OF TRUTH: petry-projects/.github-private/templates/ci-failure-analyst.yml
 # Standard:        petry-projects/.github-private/docs/aw/ci-failure-analyst.md
 # Reusable:        petry-projects/.github-private/.github/workflows/ci-failure-analyst-reusable.yml
 #
@@ -7,18 +7,18 @@
 #   • This file is a THIN CALLER STUB. All analysis logic lives in the reusable
 #     workflow above (failing-step identification, root-cause classification,
 #     and PR comment posting).
-#   • You MAY change: the SHA in the `uses:` line when upgrading the reusable
-#     workflow version; the `workflows:` filter list when adding, renaming, or
-#     removing a workflow in this repo.
-#   • You MUST NOT change: the `workflow_run` trigger type, the `uses:` line
-#     structure, the concurrency group format, or the `if:` condition
-#     (loop-prevention guard).
+#   • Keep this file in sync with the source-of-truth template above. The only
+#     intended local differences are this header and the channel pin in the
+#     `uses:` line (this repo is a ring1 member in the canary registry).
+#   • The reusable reads `github.event.check_run.*`, so the trigger must stay
+#     `check_run` — a `workflow_run` trigger leaves that payload null and the
+#     reusable fails.
 #   • If you need different behaviour, open a PR against the reusable in the
 #     central repo.
 # ─────────────────────────────────────────────────────────────────────────────
 #
 # CI Failure Analyst — thin caller for the org-level reusable.
-# To adopt: copy this file to .github/workflows/ci-failure-analyst.yml in your repo.
+# Posts a read-only diagnostic comment on PRs shortly after a CI check failure.
 # Required org/repo secrets:
 #   CLAUDE_CODE_OAUTH_TOKEN  org secret — must be granted to this repo in org
 #                            secret settings (Settings -> Secrets -> Actions)
@@ -33,34 +33,13 @@
 name: "CI Failure Analyst"
 
 on:
-  workflow_run:
-    # Explicit opt-in allowlist — intentional over a wildcard so transient or
-    # experimental workflow completions don't generate analyst noise. All 14
-    # entries here match the `name:` value of a workflow file in this repo.
-    # When adding a new workflow that should trigger failure analysis, add its
-    # exact `name:` value to this list. When renaming a workflow, update its
-    # entry here at the same time.
-    workflows:
-      - CI
-      - AgentShield
-      - Apply repository settings
-      - Auto-rebase non-Dependabot PRs
-      - Claude Code
-      - Copilot Setup Steps
-      - Dependabot auto-merge
-      - Dependabot update and merge
-      - Dependency audit
-      - Dev-Lead Agent
-      - PR Auto-Review — Ready Check
-      - PR Review — Mention Trigger
-      - PR Review Agent
-      - SonarCloud Analysis
+  check_run:
     types: [completed]
 
 permissions: {}
 
 concurrency:
-  group: "ci-failure-analyst-${{ github.event.workflow_run.head_sha }}"
+  group: "ci-failure-analyst-${{ github.event.check_run.head_sha }}"
   cancel-in-progress: false
 
 jobs:
@@ -71,10 +50,10 @@ jobs:
       actions: read
       contents: read
       checks: read
-    # Skip non-failures and the analyst's own workflow run to prevent loops.
+    # Skip non-failures and the analyst's own check run to prevent loops.
     if: >-
-      github.event.workflow_run.conclusion == 'failure' &&
-      !startsWith(github.event.workflow_run.name, 'CI Failure Analyst')
-    uses: petry-projects/.github-private/.github/workflows/ci-failure-analyst-reusable.yml@ci-failure-analyst/v1-stable  # NOSONAR(githubactions:S7637) first-party channel ref
+      github.event.check_run.conclusion == 'failure' &&
+      !startsWith(github.event.check_run.name, 'CI Failure Analyst')
+    uses: petry-projects/.github-private/.github/workflows/ci-failure-analyst-reusable.yml@ci-failure-analyst/v1-ring1  # NOSONAR(githubactions:S7637) first-party channel ref
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
