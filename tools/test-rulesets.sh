@@ -94,7 +94,7 @@ if [[ ! -f "$WORKFLOW" ]]; then
   error "Missing $WORKFLOW"
 else
   normalized_workflow=$(tr '"' "'" < "$WORKFLOW")
-  if echo "$normalized_workflow" | grep -Eq "uses:[[:space:]]*petry-projects/\.github/\.github/workflows/apply-repo-settings-reusable\.yml@apply-repo-settings/"; then
+  if echo "$normalized_workflow" | grep -Eq "uses:[[:space:]]*combsmith/\.github/\.github/workflows/apply-repo-settings-reusable\.yml@apply-repo-settings/"; then
     :  # approved reusable-workflow reference — ruleset remediation runs centrally
   elif echo "$normalized_workflow" | grep -Eq "apply-rulesets\.sh.*pr-quality"; then
     :  # legacy local applier model — also compliant

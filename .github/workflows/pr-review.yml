@@ -1,6 +1,6 @@
 name: PR Review Agent
 
-# Thin caller for the org PR Review agent (petry-projects/.github-private),
+# Thin caller for the org PR Review agent (combsmith/.github-private),
 # pinned to the known-good `pr-review/stable` channel. Adopted from the validated
 # `.github-private/pr-review-trigger.yml` template (#536 consumer fan-out).
 #
@@ -55,7 +55,7 @@ jobs:
       contents: read
       pull-requests: write
       checks: read
-    uses: petry-projects/.github-private/.github/workflows/pr-review.yml@pr-review/stable
+    uses: combsmith/.github-private/.github/workflows/pr-review.yml@pr-review/stable
     with:
       agent_ref: pr-review/stable
       pr_url: ${{ inputs.pr_url || '' }}

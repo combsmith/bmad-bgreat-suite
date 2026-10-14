@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE OF TRUTH: petry-projects/.github-private/templates/ci-failure-analyst.yml
-# Standard:        petry-projects/.github-private/docs/aw/ci-failure-analyst.md
-# Reusable:        petry-projects/.github-private/.github/workflows/ci-failure-analyst-reusable.yml
+# SOURCE OF TRUTH: combsmith/.github-private/templates/ci-failure-analyst.yml
+# Standard:        combsmith/.github-private/docs/aw/ci-failure-analyst.md
+# Reusable:        combsmith/.github-private/.github/workflows/ci-failure-analyst-reusable.yml
 #
 # AGENTS — READ BEFORE EDITING:
 #   • This file is a THIN CALLER STUB. All analysis logic lives in the reusable
@@ -27,7 +27,7 @@
 #   dev-lead             — diagnoses and attempts to fix CI failures (writes commits)
 #   ci-failure-analyst   — diagnoses only, always posts a fast diagnostic comment
 #
-# Docs: https://github.com/petry-projects/.github-private/blob/main/docs/aw/ci-failure-analyst.md
+# Docs: https://github.com/combsmith/.github-private/blob/main/docs/aw/ci-failure-analyst.md
 # ─────────────────────────────────────────────────────────────────────────────
 
 name: "CI Failure Analyst"
@@ -54,6 +54,6 @@ jobs:
     if: >-
       github.event.check_run.conclusion == 'failure' &&
       !startsWith(github.event.check_run.name, 'CI Failure Analyst')
-    uses: petry-projects/.github-private/.github/workflows/ci-failure-analyst-reusable.yml@ci-failure-analyst/v1-ring1  # NOSONAR(githubactions:S7637) first-party channel ref
+    uses: combsmith/.github-private/.github/workflows/ci-failure-analyst-reusable.yml@ci-failure-analyst/v1-ring1  # NOSONAR(githubactions:S7637) first-party channel ref
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

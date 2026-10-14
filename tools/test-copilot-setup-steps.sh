@@ -6,7 +6,7 @@
 # `copilot-setup-steps-invalid-job-name` error — this guard catches a regression
 # in PR CI instead of waiting for the next audit.
 #
-# Detection mirrors the org audit (petry-projects/.github
+# Detection mirrors the org audit (combsmith/.github
 # scripts/compliance-audit.sh): an indentation-based parser, not a loose grep,
 # so comments or similarly named keys elsewhere cannot falsely satisfy it.
 set -euo pipefail

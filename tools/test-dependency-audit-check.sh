@@ -4,7 +4,7 @@
 # code-quality ruleset (compliance: ruleset-drift-code-quality-required_status_checks,
 # issue #388).
 #
-# The codified ruleset (petry-projects/.github → standards/rulesets/code-quality.json)
+# The codified ruleset (combsmith/.github → standards/rulesets/code-quality.json)
 # requires the context "dependency-audit / Detect ecosystems". A GitHub check
 # context from a reusable-workflow caller is "<caller-job-id> / <reusable-job-name>",
 # so that exact context is produced only when:
@@ -22,7 +22,7 @@
 set -euo pipefail
 
 WORKFLOW="${1:-.github/workflows/dependency-audit.yml}"
-REUSABLE="petry-projects/.github/.github/workflows/dependency-audit-reusable.yml"
+REUSABLE="combsmith/.github/.github/workflows/dependency-audit-reusable.yml"
 CALLER_JOB="dependency-audit"
 
 ERRORS=0
