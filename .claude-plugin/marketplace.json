@@ -4,8 +4,8 @@
     "name": "Don Petry"
   },
   "license": "MIT",
-  "homepage": "https://github.com/petry-projects/bmad-bgreat-suite",
-  "repository": "https://github.com/petry-projects/bmad-bgreat-suite",
+  "homepage": "https://github.com/combsmith/bmad-bgreat-suite",
+  "repository": "https://github.com/combsmith/bmad-bgreat-suite",
   "keywords": ["bmad", "sre", "devops", "observability", "incident-response", "infrastructure", "ci-cd", "reliability"],
   "plugins": [
     {

@@ -1,6 +1,6 @@
 # BMad BGreat Suite
 
-[![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/petry-projects/.github/blob/main/CONTRIBUTING.md)
+[![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/combsmith/.github/blob/main/CONTRIBUTING.md)
 
 Additional agents to extend the [BMad Method](https://github.com/bmad-code-org/BMAD-METHOD) ecosystem.
 
@@ -158,7 +158,7 @@ For commercial inquiries, email [support@combsmith.com](mailto:support@combsmith
 
 ## Contributing
 
-See the org-wide [Contributing Guide](https://github.com/petry-projects/.github/blob/main/CONTRIBUTING.md). Contributions welcome. This module is designed to grow — new agents and workflows can be added following the patterns in `src/agents/` and `src/workflows/`.
+See the org-wide [Contributing Guide](https://github.com/combsmith/.github/blob/main/CONTRIBUTING.md). Contributions welcome. This module is designed to grow — new agents and workflows can be added following the patterns in `src/agents/` and `src/workflows/`.
 
 1. Fork the repo
 2. Create a feature branch

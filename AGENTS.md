@@ -1,6 +1,6 @@
 # BMad BGreat Suite — Agent Development Standards
 
-> Extends the org-level standards at [petry-projects/.github/AGENTS.md](https://github.com/petry-projects/.github/blob/main/AGENTS.md).
+> Extends the org-level standards at [combsmith/.github/AGENTS.md](https://github.com/combsmith/.github/blob/main/AGENTS.md).
 > This file defines project-specific conventions for the BGreat Suite module.
 
 ## Project Overview

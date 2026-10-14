@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Validates that .github/workflows/ci.yml contains a compliant secret-scan job
 # per the org push-protection standard.
-# See: https://github.com/petry-projects/.github/blob/main/standards/push-protection.md#required-ci-job
+# See: https://github.com/combsmith/.github/blob/main/standards/push-protection.md#required-ci-job
 set -euo pipefail
 
 ERRORS=0

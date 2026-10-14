@@ -8,7 +8,7 @@
 # carries a guard that skips them, in either accepted form:
 #
 #   - the org-standard actor form synced from
-#     petry-projects/.github standards/workflows/pr-review.yml:
+#     combsmith/.github standards/workflows/pr-review.yml:
 #       if: ${{ github.actor != 'dependabot[bot]' }}
 #     It skips events Dependabot itself triggers (the restricted-secret context)
 #     and lets a human-triggered event on a Dependabot PR run with secrets.

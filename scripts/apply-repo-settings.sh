@@ -17,7 +17,7 @@ fi
 
 # Normalise to owner/repo form.
 if [[ "$REPO" != */* ]]; then
-  REPO="petry-projects/$REPO"
+  REPO="combsmith/$REPO"
 fi
 
 echo "Applying repository settings to ${REPO}..."

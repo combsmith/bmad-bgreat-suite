@@ -93,4 +93,4 @@ No test runner. Structural validation is performed by `bash tools/validate-skill
 
 ## Organization Standards
 
-See [petry-projects/.github AGENTS.md](https://github.com/petry-projects/.github/blob/main/AGENTS.md) for org-level standards.
+See [combsmith/.github AGENTS.md](https://github.com/combsmith/.github/blob/main/AGENTS.md) for org-level standards.

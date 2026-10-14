@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Validates that .github/workflows/dev-lead.yml does NOT declare a top-level
-# concurrency block. Since petry-projects/.github#402, concurrency is centralised
+# concurrency block. Since combsmith/.github#402, concurrency is centralised
 # in the reusable workflow (dev-lead-reusable.yml) with per-issue / per-PR lanes.
 # A local concurrency block in the caller would override the reusable's lanes and
 # re-introduce the serialisation problems fixed by #402.
@@ -33,7 +33,7 @@ if ! python3 -c "import yaml" > /dev/null 2>&1; then
 fi
 
 # Check 1: the workflow parses as valid YAML and does NOT declare a top-level
-# concurrency block. Since petry-projects/.github#402, concurrency lives in the
+# concurrency block. Since combsmith/.github#402, concurrency lives in the
 # reusable workflow. A caller-level block would override the reusable's per-lane
 # grouping and re-introduce API-quota exhaustion (HTTP 429).
 echo "Check 1: no top-level concurrency block (concurrency is in the reusable)"
@@ -56,7 +56,7 @@ concurrency = doc.get("concurrency")
 if concurrency is not None:
     print(
         "top-level 'concurrency:' key found — remove it; concurrency is "
-        "centralised in the reusable workflow (petry-projects/.github#402)",
+        "centralised in the reusable workflow (combsmith/.github#402)",
         file=sys.stderr,
     )
     sys.exit(1)
