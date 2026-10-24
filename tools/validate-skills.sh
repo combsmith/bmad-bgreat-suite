@@ -144,6 +144,20 @@ for dir in "$SRC"/workflows/*/; do
     done < <(grep -oE '\.\./templates/[A-Za-z0-9._-]+\.md|\.\./\.\./\.\./templates/[A-Za-z0-9._-]+\.md' "$stepfile" 2>/dev/null || true)
   done
 done
+
+# Check standalone skill files for ./templates/ and ../../agents/ references
+for dir in "$SRC"/skills/*/; do
+  [[ -d "$dir" ]] || continue
+  skill_name=$(basename "$dir")
+  if [[ -f "$dir/SKILL.md" ]]; then
+    while IFS= read -r ref; do
+      resolved=$(cd "$dir" && realpath -q "$ref" 2>/dev/null || echo "")
+      if [[ -z "$resolved" ]] || [[ ! -f "$resolved" ]]; then
+        error "Broken reference '$ref' in skills/$skill_name/SKILL.md (file not found)"
+      fi
+    done < <(grep -oE '\./templates/[A-Za-z0-9._-]+\.md|\.\./\.\./agents/[A-Za-z0-9._-]+/SKILL\.md' "$dir/SKILL.md" 2>/dev/null || true)
+  fi
+done
 echo "$DONE_MARK"
 
 # ---------------------------------------------------------------------------
@@ -168,15 +182,15 @@ for dir in "$SRC"/workflows/*/templates; do
     fi
   done
 done
-# Also check shared templates
-for tmpl in "$SRC"/templates/*.md; do
+# Also check standalone skill templates and shared templates
+for tmpl in "$SRC"/skills/*/templates/*.md "$SRC"/templates/*.md; do
   [[ -f "$tmpl" ]] || continue
-  tmpl_name=$(basename "$tmpl")
+  rel_tmpl=${tmpl#"$SRC"/}
   first_line=$(head -1 "$tmpl")
   if [[ "$first_line" = "---" ]]; then
     frontmatter=$(awk 'BEGIN{f=0} /^---$/{f++; next} f==1{print} f>=2{exit}' "$tmpl")
     if ! echo "$frontmatter" | grep -q '^status:'; then
-      error "Missing 'status' in frontmatter of templates/$tmpl_name"
+      error "Missing 'status' in frontmatter of $rel_tmpl"
     fi
   fi
 done
@@ -209,9 +223,9 @@ fi
 echo "$DONE_MARK"
 
 # ---------------------------------------------------------------------------
-# Check 9: Every agent directory has SKILL.md and bmad-skill-manifest.yaml
+# Check 9: Every agent and standalone skill directory has SKILL.md and bmad-skill-manifest.yaml
 # ---------------------------------------------------------------------------
-echo "Check 9: Agent directories have SKILL.md and bmad-skill-manifest.yaml"
+echo "Check 9: Agent and skill directories have SKILL.md and bmad-skill-manifest.yaml"
 for dir in "$SRC"/agents/*/; do
   [[ -d "$dir" ]] || continue
   name=$(basename "$dir")
@@ -220,6 +234,16 @@ for dir in "$SRC"/agents/*/; do
   fi
   if [[ ! -f "$dir/bmad-skill-manifest.yaml" ]]; then
     error "Missing bmad-skill-manifest.yaml in agents/$name"
+  fi
+done
+for dir in "$SRC"/skills/*/; do
+  [[ -d "$dir" ]] || continue
+  name=$(basename "$dir")
+  if [[ ! -f "$dir/SKILL.md" ]]; then
+    error "Missing SKILL.md in skills/$name"
+  fi
+  if [[ ! -f "$dir/bmad-skill-manifest.yaml" ]]; then
+    error "Missing bmad-skill-manifest.yaml in skills/$name"
   fi
 done
 echo "$DONE_MARK"
@@ -238,7 +262,7 @@ fi
 
 skip_pattern='^(project-root)$'
 
-for stepfile in "$SRC"/workflows/*/steps/*.md "$SRC"/workflows/*/workflow.md "$SRC"/agents/*/SKILL.md; do
+for stepfile in "$SRC"/workflows/*/steps/*.md "$SRC"/workflows/*/workflow.md "$SRC"/agents/*/SKILL.md "$SRC"/skills/*/SKILL.md; do
   [[ -f "$stepfile" ]] || continue
   refs=$(grep -oE '`\{[a-z][a-z_-]*\}`' "$stepfile" 2>/dev/null | sed 's/[`{}]//g' | sort -u || true)
   for var in $refs; do
