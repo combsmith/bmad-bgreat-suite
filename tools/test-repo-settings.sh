@@ -10,6 +10,9 @@ WORKFLOW="${1:-.github/workflows/apply-repo-settings.yml}"
 LEGACY_SCRIPT="${2:-scripts/apply-repo-settings.sh}"
 readonly DONE_MARK="  done."
 
+# Record a validation error message to stderr and increment ERRORS.
+# Arguments:
+#   $1 - Error message to report.
 error() {
   local msg="$1"
   echo "ERROR: $msg" >&2
@@ -56,8 +59,31 @@ fi
 if ! grep -Eq '^[[:space:]]*workflow_dispatch:' "$WORKFLOW"; then
   error "$WORKFLOW has no 'workflow_dispatch:' trigger — settings must remain manually recoverable"
 fi
-if ! grep -Eq "^[[:space:]]*-[[:space:]]*['\"]?\.github/workflows/apply-repo-settings\.yml['\"]?[[:space:]]*$" "$WORKFLOW"; then
-  error "$WORKFLOW push trigger does not watch '.github/workflows/apply-repo-settings.yml'"
+if ! command -v python3 >/dev/null 2>&1 || ! python3 -c "import yaml" >/dev/null 2>&1; then
+  error "$WORKFLOW cannot be validated: python3 with PyYAML is required"
+elif ! python3 - "$WORKFLOW" <<'PY'
+import sys, yaml
+
+TARGET_PATH = ".github/workflows/apply-repo-settings.yml"
+
+with open(sys.argv[1]) as fh:
+    wf = yaml.safe_load(fh)
+
+if not isinstance(wf, dict):
+    sys.exit(1)
+
+on_block = wf.get("on") if "on" in wf else wf.get(True)
+push_block = on_block.get("push") if isinstance(on_block, dict) else None
+paths = push_block.get("paths") if isinstance(push_block, dict) else None
+paths_ignore = push_block.get("paths-ignore") if isinstance(push_block, dict) else None
+
+if not isinstance(paths, list) or TARGET_PATH not in paths:
+    sys.exit(1)
+if isinstance(paths_ignore, list) and TARGET_PATH in paths_ignore:
+    sys.exit(1)
+PY
+then
+  error "$WORKFLOW on.push.paths must include '.github/workflows/apply-repo-settings.yml' (and not under paths-ignore)"
 fi
 echo "$DONE_MARK"
 
@@ -66,17 +92,7 @@ echo "$DONE_MARK"
 echo ""
 echo "Check 4: $WORKFLOW delegates to org reusable workflow with checkout_ref in lockstep"
 if ! command -v python3 >/dev/null 2>&1 || ! python3 -c "import yaml" >/dev/null 2>&1; then
-  echo "  python3/PyYAML unavailable — falling back to grep validation" >&2
-  uses_channel=$(sed -nE 's/^[[:space:]]*uses:[[:space:]]*combsmith\/\.github\/\.github\/workflows\/apply-repo-settings-reusable\.yml@([^[:space:]#]+).*/\1/p' "$WORKFLOW" | head -n 1)
-  checkout_channel=$(sed -nE 's/^[[:space:]]*checkout_ref:[[:space:]]*([^[:space:]#]+).*/\1/p' "$WORKFLOW" | head -n 1)
-  if [[ -z "$uses_channel" ]] || [[ ! "$uses_channel" =~ ^apply-repo-settings/v[0-9]+-ring1$ ]]; then
-    error "$WORKFLOW does not delegate to combsmith/.github/.github/workflows/apply-repo-settings-reusable.yml@apply-repo-settings/v<N>-ring1"
-  elif [[ "$checkout_channel" != "$uses_channel" ]]; then
-    error "$WORKFLOW checkout_ref ('$checkout_channel') does not match uses: channel ('$uses_channel')"
-  fi
-  if ! grep -Eq '^[[:space:]]*secrets:[[:space:]]*inherit([[:space:]]|#|$)' "$WORKFLOW"; then
-    error "$WORKFLOW does not set 'secrets: inherit'"
-  fi
+  error "$WORKFLOW cannot be validated: python3 with PyYAML is required"
 else
   stub_problems=$(python3 - "$WORKFLOW" <<'PY'
 import re, sys, yaml
@@ -134,7 +150,7 @@ echo "$DONE_MARK"
 echo ""
 echo "Check 5: $WORKFLOW uses only valid permissions scopes"
 if ! command -v python3 >/dev/null 2>&1 || ! python3 -c "import yaml" >/dev/null 2>&1; then
-  echo "  python3/PyYAML unavailable — skipping permissions-scope validation" >&2
+  error "$WORKFLOW cannot be validated: python3 with PyYAML is required"
 else
   invalid_scopes=$(python3 - "$WORKFLOW" <<'PY'
 import sys, yaml
@@ -153,8 +169,7 @@ if not isinstance(wf, dict):
     wf = {}
 
 def scopes(perms):
-    # A mapping of scope -> level; a bare string ("read-all"/"write-all") or
-    # empty mapping declares no individual scopes to validate.
+    """Return the set of individual permission scope keys declared in perms."""
     return set(perms) if isinstance(perms, dict) else set()
 
 bad = set()
