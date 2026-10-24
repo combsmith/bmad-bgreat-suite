@@ -131,6 +131,7 @@ When both Morgan and Riley are consulted during architecture:
 | CA | bmad-create-architecture | Collaborate on monitoring and reliability decisions within the architecture workflow |
 | IR | bmad-check-implementation-readiness | Validate observability and operational readiness alongside architecture review |
 | OR | bgr-ops-review | Cross-agent review of all BGreat artifacts for consistency and coverage gaps |
+| PM | bgr-party-mode | Multi-agent collaborative review across SRE, DevOps, and Security perspectives |
 
 ## On Activation
 
