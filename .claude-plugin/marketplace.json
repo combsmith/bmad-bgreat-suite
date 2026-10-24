@@ -6,12 +6,12 @@
   "license": "MIT",
   "homepage": "https://github.com/combsmith/bmad-bgreat-suite",
   "repository": "https://github.com/combsmith/bmad-bgreat-suite",
-  "keywords": ["bmad", "sre", "devops", "observability", "incident-response", "infrastructure", "ci-cd", "reliability"],
+  "keywords": ["bmad", "sre", "devops", "security", "observability", "incident-response", "infrastructure", "ci-cd", "reliability"],
   "plugins": [
     {
       "name": "bmad-bgreat-suite",
       "source": "./",
-      "description": "BGreat Suite -- SRE and DevOps agents (Morgan, Riley) with phased workflows for observability, incident response, infrastructure, and CI/CD pipeline design. Part of the BMad Method ecosystem.",
+      "description": "BGreat Suite -- SRE, DevOps, and Security agents (Morgan, Riley, Sam) with ten guided workflows, cross-agent operations review, and multi-agent party mode for production readiness. Part of the BMad Method ecosystem.",
       "version": "0.1.0",
       "author": {
         "name": "Don Petry"
@@ -19,10 +19,19 @@
       "skills": [
         "./src/agents/bgr-agent-morgan-sre",
         "./src/agents/bgr-agent-riley-devops",
+        "./src/agents/bgr-agent-sam-security",
         "./src/workflows/bgr-3-create-observability",
         "./src/workflows/bgr-3-create-incident-response",
+        "./src/workflows/bgr-3-create-disaster-recovery",
+        "./src/workflows/bgr-3-create-resilience-plan",
+        "./src/workflows/bgr-3-create-chaos-gameday-plan",
         "./src/workflows/bgr-3-create-infrastructure",
-        "./src/workflows/bgr-3-create-pipeline"
+        "./src/workflows/bgr-3-create-pipeline",
+        "./src/workflows/bgr-3-create-capacity-plan",
+        "./src/workflows/bgr-3-create-cost-optimization-plan",
+        "./src/workflows/bgr-3-create-security-plan",
+        "./src/skills/bgr-ops-review",
+        "./src/skills/bgr-party-mode"
       ]
     }
   ]
