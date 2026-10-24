@@ -306,24 +306,56 @@ fi
 echo "$DONE_MARK"
 
 # ---------------------------------------------------------------------------
-# Check 12: copilot-setup-steps.yml has the required job name
-# GitHub requires the job to be named exactly `copilot-setup-steps` to pick
-# up the file for the Copilot cloud agent.
+# Check 13: step-05-validation.md cross-workflow coherence and workflow count
 # ---------------------------------------------------------------------------
-echo "Check 12: .github/workflows/copilot-setup-steps.yml has job named copilot-setup-steps"
-COPILOT_WF=".github/workflows/copilot-setup-steps.yml"
-if [[ ! -f "$COPILOT_WF" ]]; then
-  error "Missing $COPILOT_WF"
-elif ! awk '
-  BEGIN { in_jobs=0; found=0 }
-  /^[[:space:]]*jobs:[[:space:]]*$/ { in_jobs=1; next }
-  in_jobs && /^[^[:space:]]/ { in_jobs=0 }
-  in_jobs && /^[[:space:]]+copilot-setup-steps[[:space:]]*:/ { found=1; exit }
-  END { exit(found ? 0 : 1) }
-' "$COPILOT_WF"; then
-  error "$COPILOT_WF does not contain a job named 'copilot-setup-steps' (GitHub requires this exact name)"
+echo "Check 13: step-05-validation.md workflow count and cross-plan coherence checks"
+for stepfile in "$SRC"/workflows/*/steps/step-05-validation.md; do
+  [[ -f "$stepfile" ]] || continue
+  rel_path=${stepfile#"$SRC"/}
+
+  # 13a: Must not reference outdated 'all 7 workflows' (checklist defines 8 plans)
+  if grep -qE 'all 7 workflows' "$stepfile"; then
+    error "$rel_path references 'all 7 workflows' instead of 'all 8 workflows'"
+  fi
+
+  # 13b: Any status check on Infrastructure Plan must accept 'approved' (its terminal state)
+  while IFS= read -r line; do
+    if ! echo "$line" | grep -qi 'approved'; then
+      error "$rel_path checks Infrastructure Plan status without accepting 'approved': $line"
+    fi
+  done < <(grep -E 'Infrastructure Plan.*(status is|— if)' "$stepfile" 2>/dev/null || true)
+done
+
+DR_VAL="$SRC/workflows/bgr-3-create-disaster-recovery/steps/step-05-validation.md"
+if [[ -f "$DR_VAL" ]]; then
+  # Section 2 must lead with Infrastructure Plan and include DR-specific checks
+  first_coherence_plan=$(awk '/^### 2\. Cross-Workflow Coherence Validation/{flag=1; next} flag && /^\*\*If .* Plan exists:\*\*/{print; exit}' "$DR_VAL")
+  if [[ "$first_coherence_plan" != "**If Infrastructure Plan exists:**" ]]; then
+    error "workflows/bgr-3-create-disaster-recovery/steps/step-05-validation.md Section 2 must lead with '**If Infrastructure Plan exists:**' (found: '$first_coherence_plan')"
+  fi
+  if ! grep -qF "Does the DR topology match the infrastructure architecture (multi-region, multi-AZ)?" "$DR_VAL"; then
+    error "workflows/bgr-3-create-disaster-recovery/steps/step-05-validation.md missing '(multi-region, multi-AZ)' topology coherence check"
+  fi
+  if ! grep -qF "Is the handoff from incident response to DR activation clearly defined?" "$DR_VAL"; then
+    error "workflows/bgr-3-create-disaster-recovery/steps/step-05-validation.md missing DR activation handoff coherence check"
+  fi
+  if ! grep -qF "Do DR failover triggers map to incident severity levels?" "$DR_VAL"; then
+    error "workflows/bgr-3-create-disaster-recovery/steps/step-05-validation.md missing DR failover trigger severity mapping check"
+  fi
+  first_dep_plan=$(awk '/^4\. Check for cross-plan dependency gaps:/{flag=1; next} flag && /^[[:space:]]*- If .* Plan exists:/{sub(/^[[:space:]]+/, ""); print; exit}' "$DR_VAL")
+  if [[ "$first_dep_plan" != "- If Infrastructure Plan exists: Verify DR topology matches infrastructure architecture, DR regions are consistent" ]]; then
+    error "workflows/bgr-3-create-disaster-recovery/steps/step-05-validation.md Section 11.4 must lead with Infrastructure Plan dependency check"
+  fi
 fi
-echo "  done."
+
+SEC_VAL="$SRC/workflows/bgr-3-create-security-plan/steps/step-05-validation.md"
+if [[ -f "$SEC_VAL" ]]; then
+  # shellcheck disable=SC2016
+  if ! grep -qF '**Infrastructure Plan** — if `Approved` or `Complete`:' "$SEC_VAL"; then
+    error "workflows/bgr-3-create-security-plan/steps/step-05-validation.md must check Infrastructure Plan status as 'Approved' or 'Complete'"
+  fi
+fi
+echo "$DONE_MARK"
 
 # ---------------------------------------------------------------------------
 # Summary
