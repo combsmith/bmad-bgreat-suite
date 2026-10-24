@@ -130,6 +130,7 @@ When `{user_name}` signals that the discussion is complete (or requests the repo
 
 1. Synthesize the session using the template at `./templates/party-mode-report.md`:
    - Populate the session metadata fields (`{use_case}`, `{participating_agents}`, `{execution_mode}`, `Project`, `Topic / Target`, `Generated`, and frontmatter `createdDate`/`lastUpdated`) from the values determined in Steps 1–3, and include only the subsections for agents that participated in the session
+   - Populate the Artifact & Context Discovery table with each artifact's discovered status and file path, and replace `Artifacts found: 0 / 11` with the actual count
    - Preserve each participating agent's unabridged domain findings and populate their domain verdict placeholder (`{morgan_verdict}`, `{riley_verdict}`, `{sam_verdict}`)
    - Document every cross-domain conflict, each agent's position, the trade-off options, and any decision reached
    - Capture key exchanges from the dynamic follow-up rounds
