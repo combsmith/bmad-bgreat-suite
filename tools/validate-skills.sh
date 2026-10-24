@@ -351,8 +351,8 @@ fi
 SEC_VAL="$SRC/workflows/bgr-3-create-security-plan/steps/step-05-validation.md"
 if [[ -f "$SEC_VAL" ]]; then
   # shellcheck disable=SC2016
-  if ! grep -qF '**Infrastructure Plan** — if `Approved` or `Complete`:' "$SEC_VAL"; then
-    error "workflows/bgr-3-create-security-plan/steps/step-05-validation.md must check Infrastructure Plan status as 'Approved' or 'Complete'"
+  if ! grep -qF '**Infrastructure Plan** — if `approved` or `complete`:' "$SEC_VAL"; then
+    error "workflows/bgr-3-create-security-plan/steps/step-05-validation.md must check Infrastructure Plan status as 'approved' or 'complete'"
   fi
 fi
 echo "$DONE_MARK"

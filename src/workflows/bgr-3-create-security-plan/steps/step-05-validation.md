@@ -294,7 +294,7 @@ After saving the security plan, update the cross-workflow production readiness c
 4. Check for cross-plan dependency gaps (verify each plan's `status` field before validating):
    - **Observability Plan** — if `Complete`: verify security monitoring requirements (auth events, compliance logs) are covered. If `Draft`: validation deferred.
    - **Incident Response Plan** — if `Complete`: verify security incident classification aligns with severity framework. If `Draft`: validation deferred.
-   - **Infrastructure Plan** — if `Approved` or `Complete`: verify network segmentation and encryption mandates are enforced. If `Draft`: validation deferred.
+   - **Infrastructure Plan** — if `approved` or `complete`: verify network segmentation and encryption mandates are enforced. If `draft`: validation deferred.
    - **Pipeline Plan** — if `Complete`: verify security scanning stages align with testing strategy. If `Draft`: validation deferred.
    - **Disaster Recovery Plan** — if `Complete`: verify DR procedures account for security failover requirements. If `Draft`: validation deferred.
    - **Capacity Planning** — if `Complete`: verify capacity planning accounts for security infrastructure overhead. If `Draft`: validation deferred.
