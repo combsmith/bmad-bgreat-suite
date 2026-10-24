@@ -10,9 +10,9 @@ lastUpdated: ""
 
 - **Project**:
 - **Topic / Target**:
-- **Use Case**: Plan Review Gate | Architecture Input | Incident Post-Mortem | Production Readiness Assessment
-- **Participating Agents**: Morgan (SRE Lead), Riley (DevOps Lead), Sam (Security Lead)
-- **Execution Mode**: Independent Subagents | Inline Persona Isolation
+- **Use Case**: {use_case}
+- **Participating Agents**: {participating_agents}
+- **Execution Mode**: {execution_mode}
 - **Generated**:
 - **Artifacts Directory**: `{bgr_artifacts}/`
 

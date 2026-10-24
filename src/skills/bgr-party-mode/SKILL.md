@@ -129,7 +129,8 @@ After presenting the unabridged Round 1 responses:
 When `{user_name}` signals that the discussion is complete (or requests the report immediately):
 
 1. Synthesize the session using the template at `./templates/party-mode-report.md`:
-   - Preserve each agent's unabridged domain findings and verdict
+   - Populate the session metadata fields (`{use_case}`, `{participating_agents}`, `{execution_mode}`, `Project`, `Topic / Target`, `Generated`, and frontmatter `createdDate`/`lastUpdated`) from the values determined in Steps 1–3, and include only the subsections for agents that participated in the session
+   - Preserve each participating agent's unabridged domain findings and verdict
    - Document every cross-domain conflict, each agent's position, the trade-off options, and any decision reached
    - Capture key exchanges from the dynamic follow-up rounds
    - Compile prioritized **Consensus Recommendations** (`Blocking`, `High Priority`, `Suggested Improvements`) with owning agents
