@@ -38,7 +38,7 @@ lastUpdated: ""
 
 ### 3.1 Morgan (SRE Lead) — Reliability & Observability Perspective
 
-- **Domain Verdict**: PASS | PASS WITH CONCERNS | BLOCKING ISSUES
+- **Domain Verdict**: {morgan_verdict}
 
 #### Unabridged Review
 
@@ -51,7 +51,7 @@ lastUpdated: ""
 
 ### 3.2 Riley (DevOps Lead) — Infrastructure & Operability Perspective
 
-- **Domain Verdict**: PASS | PASS WITH CONCERNS | BLOCKING ISSUES
+- **Domain Verdict**: {riley_verdict}
 
 #### Unabridged Review
 
@@ -64,7 +64,7 @@ lastUpdated: ""
 
 ### 3.3 Sam (Security Lead) — Threat & Compliance Perspective
 
-- **Domain Verdict**: PASS | PASS WITH CONCERNS | BLOCKING ISSUES
+- **Domain Verdict**: {sam_verdict}
 
 #### Unabridged Review
 
@@ -119,6 +119,6 @@ lastUpdated: ""
 
 ## 7. Gate Verdict
 
-- **Overall Verdict**: APPROVED | APPROVED WITH CONDITIONS | CHANGES REQUIRED
+- **Overall Verdict**: {overall_verdict}
 - **Summary Rationale**:
 - **Required Follow-Up Actions**:

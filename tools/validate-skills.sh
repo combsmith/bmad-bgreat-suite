@@ -260,7 +260,7 @@ if [[ -f "$SRC/module.yaml" ]]; then
   known_vars="$yaml_keys"$'\n'"$inherited_keys"
 fi
 
-skip_pattern='^(project-root|use_case|participating_agents|execution_mode)$'
+skip_pattern='^(project-root|use_case|participating_agents|execution_mode|morgan_verdict|riley_verdict|sam_verdict|overall_verdict)$'
 
 for stepfile in "$SRC"/workflows/*/steps/*.md "$SRC"/workflows/*/workflow.md "$SRC"/agents/*/SKILL.md "$SRC"/skills/*/SKILL.md; do
   [[ -f "$stepfile" ]] || continue
