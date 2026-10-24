@@ -4,7 +4,7 @@
 
 Additional agents to extend the [BMad Method](https://github.com/bmad-code-org/BMAD-METHOD) ecosystem.
 
-Three specialized agents — **Morgan** (SRE Lead), **Riley** (DevOps Lead), and **Sam** (Security Lead) — with ten guided workflows and a cross-agent operations review that produce production-readiness artifacts alongside your architecture planning.
+Three specialized agents — **Morgan** (SRE Lead), **Riley** (DevOps Lead), and **Sam** (Security Lead) — with ten guided workflows, a cross-agent operations review, and multi-agent party mode that produce production-readiness artifacts alongside your architecture planning.
 
 ## What's Included
 
@@ -31,6 +31,7 @@ Three specialized agents — **Morgan** (SRE Lead), **Riley** (DevOps Lead), and
 | Create Cost Optimization Plan | `CF` | Riley + Morgan | FinOps strategy, right-sizing, reserved/spot, cost governance |
 | Create Security Plan | `CS` | Sam | Threat model, security controls, auth strategy, compliance mapping |
 | Operations Review | `OR` | Any agent | Cross-agent consistency review, coverage gaps, staleness checks |
+| Operations Party Mode | `PM` | Morgan + Riley + Sam | Multi-agent collaborative review, cross-domain conflict analysis, consensus recommendations |
 
 ### Recommended Workflow Order
 
@@ -45,7 +46,7 @@ Architecture (bmm) --> Observability (CO) --> Incident Response (CR)
 
 Incident Response (CR) --> Resilience Testing (CT)
 
-After any workflows: Operations Review (OR)
+After any workflows: Operations Review (OR) / Operations Party Mode (PM)
 ```
 
 Multiple tracks can run in parallel after the architecture is defined.
@@ -100,6 +101,7 @@ Invoke any workflow by menu code:
 - `CF` — Create Cost Optimization Plan
 - `CS` — Create Security Plan
 - `OR` — Operations Review
+- `PM` — Operations Party Mode
 
 ### Cross-module collaboration
 
@@ -126,6 +128,9 @@ src/
     bgr-3-create-capacity-plan/
     bgr-3-create-cost-optimization-plan/
     bgr-3-create-security-plan/
+  skills/
+    bgr-ops-review/        # Cross-agent artifact consistency review
+    bgr-party-mode/        # Multi-agent collaborative review session
 ```
 
 Each workflow follows BMAD's micro-file architecture: a `workflow.md` orchestrator, sequential `steps/` for guided discovery, and `templates/` for output documents.
