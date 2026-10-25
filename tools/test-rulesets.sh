@@ -254,7 +254,11 @@ for lineno, raw_line in enumerate(text.splitlines(), start=1):
     stripped = raw_line.strip()
     if not stripped or stripped.startswith("#"):
         continue
-    tokens = stripped.split()
+    tokens = []
+    for token in stripped.split():
+        if token.startswith("#"):
+            break
+        tokens.append(token)
     if len(tokens) < 2:
         sys.exit(f"line {lineno} has pattern {tokens[0]!r} with no owners")
     pattern, owners = tokens[0], tokens[1:]
