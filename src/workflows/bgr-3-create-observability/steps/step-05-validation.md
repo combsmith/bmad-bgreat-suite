@@ -353,12 +353,12 @@ After saving the observability plan, update the cross-workflow production readin
    - If Incident Response Plan exists and status is `complete`: Verify alerting thresholds align with severity classification. If status is `draft`, note validation is deferred pending finalization.
    - If Infrastructure Plan exists and status is `complete` or `approved`: Verify monitoring targets match environment topology. If status is `draft`, note validation is deferred pending finalization.
    - If Pipeline Plan exists and status is `complete`: Verify health check metrics align with post-deploy verification. If status is `draft`, note validation is deferred pending finalization.
-   - **Security Plan** — if `Complete`: verify security monitoring requirements (auth events, compliance audit logs) are covered by the observability strategy. If `Draft`: validation deferred.
-   - **Disaster Recovery Plan** — if `Complete`: verify SLO definitions account for DR failover scenarios and monitoring covers failover health. If `Draft`: validation deferred.
-   - **Capacity Planning** — if `Complete`: verify scaling triggers reference metrics defined in the observability plan. If `Draft`: validation deferred.
+   - **Security Plan** — if `complete`: verify security monitoring requirements (auth events, compliance audit logs) are covered by the observability strategy. If `draft`: validation deferred.
+   - **Disaster Recovery Plan** — if `complete`: verify SLO definitions account for DR failover scenarios and monitoring covers failover health. If `draft`: validation deferred.
+   - **Capacity Planning** — if `complete`: verify scaling triggers reference metrics defined in the observability plan. If `draft`: validation deferred.
    - Record any inconsistencies or deferred validations in section **4.3 Consistency Issues**
 5. Update the `completedWorkflows` array in checklist frontmatter to include `observability`. Add this workflow only if it is not already present (use set-style uniqueness to prevent duplicate entries on re-run).
-6. If all 7 workflows are now complete, update **Overall Status** to `READY` (if no critical gaps remain). A **critical gap** is a missing workflow artifact, an unresolved cross-plan dependency, or a key decision conflict between plans that would block production readiness (e.g., mismatched environment topologies, missing rollback alignment, or undefined alerting-to-severity mappings).
+6. If all 8 workflows are now complete, update **Overall Status** to `READY` (if no critical gaps remain). A **critical gap** is a missing workflow artifact, an unresolved cross-plan dependency, or a key decision conflict between plans that would block production readiness (e.g., mismatched environment topologies, missing rollback alignment, or undefined alerting-to-severity mappings).
 7. Save the updated checklist
 
 ### 11. Completion Summary
