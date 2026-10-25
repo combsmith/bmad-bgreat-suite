@@ -348,6 +348,12 @@ for stepfile in "$SRC"/workflows/*/steps/step-05-validation.md; do
       error "$rel_path checks Infrastructure Plan status without accepting 'approved': $line"
     fi
   done < <(grep -E 'Infrastructure Plan.*(status is|— if)' "$stepfile" 2>/dev/null || true)
+
+  # 13c: Cross-plan dependency status checks must use stored lowercase frontmatter values
+  # shellcheck disable=SC2016
+  if grep -qE '(— if `(Complete|Approved|Draft)`|If `Draft`)' "$stepfile"; then
+    error "$rel_path uses capitalized status values in cross-plan dependency checks instead of stored lowercase ('complete', 'approved', 'draft')"
+  fi
 done
 
 DR_VAL="$SRC/workflows/bgr-3-create-disaster-recovery/steps/step-05-validation.md"
