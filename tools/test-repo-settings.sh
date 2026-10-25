@@ -75,10 +75,18 @@ if not isinstance(wf, dict):
 
 on_block = wf.get("on") if "on" in wf else wf.get(True)
 push_block = on_block.get("push") if isinstance(on_block, dict) else None
-branches = push_block.get("branches") if isinstance(push_block, dict) else None
-branches_ignore = push_block.get("branches-ignore") if isinstance(push_block, dict) else None
-paths = push_block.get("paths") if isinstance(push_block, dict) else None
-paths_ignore = push_block.get("paths-ignore") if isinstance(push_block, dict) else None
+if not isinstance(push_block, dict):
+    sys.exit(1)
+
+if "branches" in push_block and "branches-ignore" in push_block:
+    sys.exit(1)
+if "paths" in push_block and "paths-ignore" in push_block:
+    sys.exit(1)
+
+branches = push_block.get("branches")
+branches_ignore = push_block.get("branches-ignore")
+paths = push_block.get("paths")
+paths_ignore = push_block.get("paths-ignore")
 
 if not isinstance(branches, list) or TARGET_BRANCH not in branches:
     sys.exit(1)
