@@ -64,6 +64,7 @@ if ! command -v python3 >/dev/null 2>&1 || ! python3 -c "import yaml" >/dev/null
 elif ! python3 - "$WORKFLOW" <<'PY'
 import sys, yaml
 
+TARGET_BRANCH = "main"
 TARGET_PATH = ".github/workflows/apply-repo-settings.yml"
 
 with open(sys.argv[1]) as fh:
@@ -74,16 +75,22 @@ if not isinstance(wf, dict):
 
 on_block = wf.get("on") if "on" in wf else wf.get(True)
 push_block = on_block.get("push") if isinstance(on_block, dict) else None
+branches = push_block.get("branches") if isinstance(push_block, dict) else None
+branches_ignore = push_block.get("branches-ignore") if isinstance(push_block, dict) else None
 paths = push_block.get("paths") if isinstance(push_block, dict) else None
 paths_ignore = push_block.get("paths-ignore") if isinstance(push_block, dict) else None
 
+if not isinstance(branches, list) or TARGET_BRANCH not in branches:
+    sys.exit(1)
+if isinstance(branches_ignore, list) and TARGET_BRANCH in branches_ignore:
+    sys.exit(1)
 if not isinstance(paths, list) or TARGET_PATH not in paths:
     sys.exit(1)
 if isinstance(paths_ignore, list) and TARGET_PATH in paths_ignore:
     sys.exit(1)
 PY
 then
-  error "$WORKFLOW on.push.paths must include '.github/workflows/apply-repo-settings.yml' (and not under paths-ignore)"
+  error "$WORKFLOW on.push must include 'main' in branches and '.github/workflows/apply-repo-settings.yml' in paths (and not under branches-ignore/paths-ignore)"
 fi
 echo "$DONE_MARK"
 
