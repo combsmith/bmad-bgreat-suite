@@ -104,7 +104,7 @@ echo "Check 4: $WORKFLOW converges the pr-quality ruleset (reusable ref or local
 if [[ ! -f "$WORKFLOW" ]]; then
   error "Missing $WORKFLOW"
 else
-  normalized_workflow=$(grep -Ev '^[[:space:]]*#' "$WORKFLOW" | tr '"' "'")
+  normalized_workflow=$(grep -Ev -e '^[[:space:]]*#' -- "$WORKFLOW" | tr '"' "'" || true)
   if echo "$normalized_workflow" | grep -Eq "^[[:space:]]*uses:[[:space:]]*combsmith/\.github/\.github/workflows/apply-repo-settings-reusable\.yml@apply-repo-settings/"; then
     :  # approved reusable-workflow reference — ruleset remediation runs centrally
   elif echo "$normalized_workflow" | grep -Eq "apply-rulesets\.sh.*pr-quality"; then
