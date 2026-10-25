@@ -267,14 +267,23 @@ for lineno, raw_line in enumerate(text.splitlines(), start=1):
             sys.exit(
                 f"line {lineno}: forbidden owner {owner!r} — only @combsmith/<team-slug> teams are allowed"
             )
+    if pattern == "*" and (
+        owners != ["@combsmith/org-leads"] or stripped != "* @combsmith/org-leads"
+    ):
+        sys.exit(
+            f"line {lineno}: default '*' catch-all line must be exactly '* @combsmith/org-leads' with no additional teams, got {stripped!r}"
+        )
     owner_lines.append((lineno, pattern, owners))
 
 if not owner_lines:
     sys.exit("CODEOWNERS file has no owner lines (only comments/blank)")
 
-if not any(pattern == "*" for _, pattern, _ in owner_lines):
+if not any(
+    pattern == "*" and owners == ["@combsmith/org-leads"]
+    for _, pattern, owners in owner_lines
+):
     sys.exit(
-        "CODEOWNERS has no default '*' catch-all pattern — require_code_owner_review will not cover all paths"
+        "CODEOWNERS has no default '* @combsmith/org-leads' catch-all pattern — require_code_owner_review will not cover all paths"
     )
 PY
 then
