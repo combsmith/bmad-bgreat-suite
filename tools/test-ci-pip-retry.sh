@@ -47,18 +47,22 @@ if [[ -z "$STEP_BLOCK" ]]; then
 fi
 echo "$DONE_MARK"
 
+# Strip comment-only lines so YAML/shell comments inside the step cannot
+# satisfy the flag, requirement-file, or retry-loop checks below.
+STEP_CODE=$(awk '!/^[[:space:]]*#/' <<< "$STEP_BLOCK")
+
 echo "Check 2: the install still pins pyyaml with --require-hashes and --only-binary :all:"
 # Note: this is a retry-focused smoke check that the Install PyYAML step still
 # invokes pip with hash/binary flags and a requirements file pinning pyyaml.
 # Authoritative per-package version/hash validation across all workflow pip
 # commands and requirements files lives in tools/test-ci-dependency-hardening.sh.
-if ! grep -qiE 'pip[0-9]*[[:space:]]+install' <<< "$STEP_BLOCK"; then
+if ! grep -qiE 'pip[0-9]*[[:space:]]+install' <<< "$STEP_CODE"; then
   error "Install PyYAML step no longer contains a 'pip install' invocation"
 fi
-if ! grep -qE -- '(^|[[:space:]])--require-hashes([[:space:]]|\\|;|$)' <<< "$STEP_BLOCK"; then
+if ! grep -qE -- '(^|[[:space:]])--require-hashes([[:space:]]|\\|;|$)' <<< "$STEP_CODE"; then
   error "Install PyYAML step no longer passes --require-hashes"
 fi
-if ! grep -qE -- '--only-binary([[:space:]]+|=):all:' <<< "$STEP_BLOCK"; then
+if ! grep -qE -- '--only-binary([[:space:]]+|=):all:' <<< "$STEP_CODE"; then
   error "Install PyYAML step no longer passes --only-binary :all:"
 fi
 STEP_REQ_FILES=()
@@ -86,7 +90,7 @@ done < <(
         }
       }
     }
-  ' <<< "$STEP_BLOCK"
+  ' <<< "$STEP_CODE"
 )
 if [[ ${#STEP_REQ_FILES[@]} -eq 0 ]]; then
   error "Install PyYAML step no longer references a requirements file via -r <file>"

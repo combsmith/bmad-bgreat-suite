@@ -80,7 +80,7 @@ collect_pip_lines_from_file() {
         folded_indent = indent
         if (raw ~ /^[[:space:]]*-[[:space:]]+run:/) {
           match(raw, /^[[:space:]]*-[[:space:]]+/)
-          folded_indent = RLENGTH - 1
+          folded_indent = RLENGTH
         }
         next
       }
