@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Validates that dependency installs are hardened against OpenSSF Scorecard
-# Pinned-Dependencies findings (issue #378) and SonarCloud GitHub Actions /
-# dependency-hardening findings (issue #358):
+# Validates that dependency installs across .github/workflows/*.yml and
+# .github/workflows/*.yaml (or a single workflow passed as $1) are hardened
+# against OpenSSF Scorecard Pinned-Dependencies findings (issue #378) and
+# SonarCloud GitHub Actions / dependency-hardening findings (issue #358):
 #   - githubactions:S8541 — pip install must pass --only-binary :all: so no
 #     source-distribution setup script is executed during CI.
 #   - githubactions:S8543/S8544/S8545 & OpenSSF Scorecard Pinned-Dependencies —
@@ -25,27 +26,186 @@ error() {
   ERRORS=$((ERRORS + 1))
 }
 
-extract_req_file() {
-  local cmd="$1"
-  sed -nE 's/.*(^|[[:space:]])(-r|--requirement)([[:space:]]+|=)["'"'"']?([^"'"'"'[:space:];]+)["'"'"']?.*/\4/p' <<< "$cmd" | head -n 1
+# Joins backslash-continued lines and YAML folded `run: >` blocks before
+# scanning for `pip install`, emitting `<start-line>:<logical-line>`.
+collect_pip_lines_from_file() {
+  local wf="$1"
+  awk '
+    function flush_buf() {
+      if (buf != "") {
+        if (buf ~ /(^|[^[:alnum:]_.-])pip[0-9]*[[:space:]]+install([[:space:]]|$)/ &&
+            buf !~ /^[[:space:]]*(#|echo[[:space:]])/) {
+          printf "%d:%s\n", start_nr, buf
+        }
+        buf = ""
+        start_nr = 0
+      }
+    }
+    BEGIN {
+      buf = ""
+      start_nr = 0
+      in_folded = 0
+      folded_indent = 0
+    }
+    {
+      sub(/\r$/, "")
+      raw = $0
+      match(raw, /^[[:space:]]*/)
+      indent = RLENGTH
+      trimmed = substr(raw, indent + 1)
+
+      if (in_folded) {
+        if (trimmed == "") {
+          flush_buf()
+          next
+        }
+        if (indent <= folded_indent) {
+          flush_buf()
+          in_folded = 0
+        } else {
+          sub(/[[:space:]]*\\$/, "", trimmed)
+          if (buf == "") {
+            buf = trimmed
+            start_nr = NR
+          } else {
+            buf = buf " " trimmed
+          }
+          next
+        }
+      }
+
+      if (raw ~ /^[[:space:]]*(-[[:space:]]+)?run:[[:space:]]*>[+-]?[[:space:]]*$/) {
+        flush_buf()
+        in_folded = 1
+        folded_indent = indent
+        if (raw ~ /^[[:space:]]*-[[:space:]]+run:/) {
+          match(raw, /^[[:space:]]*-[[:space:]]+/)
+          folded_indent = RLENGTH - 1
+        }
+        next
+      }
+
+      if (trimmed ~ /^#/) {
+        next
+      }
+
+      has_cont = (trimmed ~ /\\$/)
+      if (has_cont) {
+        sub(/[[:space:]]*\\$/, "", trimmed)
+      }
+
+      if (buf == "") {
+        buf = trimmed
+        start_nr = NR
+      } else {
+        buf = buf " " trimmed
+      }
+
+      if (!has_cont) {
+        flush_buf()
+      }
+    }
+    END {
+      flush_buf()
+    }
+  ' "$wf"
 }
 
+# Extracts every `-r <file>` / `--requirement <file>` (or `=file`) path from a
+# `pip install` command segment, one per line.
+extract_req_files() {
+  local cmd="$1"
+  awk '
+    function unquote(s) {
+      sub(/^["'"'"']/, "", s)
+      sub(/["'"'"']$/, "", s)
+      return s
+    }
+    {
+      sub(/^.*pip[0-9]*[[:space:]]+install([[:space:]]+|$)/, "")
+      sub(/[;&|].*$/, "")
+      n = split($0, tok, /[[:space:]]+/)
+      for (i = 1; i <= n; i++) {
+        t = tok[i]
+        if (t == "-r" || t == "--requirement") {
+          if (i + 1 <= n) {
+            val = unquote(tok[++i])
+            if (val != "" && val !~ /^-/) print val
+          }
+        } else if (t ~ /^(-r|--requirement)=/) {
+          sub(/^(-r|--requirement)=/, "", t)
+          val = unquote(t)
+          if (val != "") print val
+        } else if (t ~ /^-r.+/) {
+          sub(/^-r/, "", t)
+          val = unquote(t)
+          if (val != "") print val
+        }
+      }
+    }
+  ' <<< "$cmd"
+}
+
+# Returns 0 (true) if the `pip install` command has inline package arguments or
+# unsupported flags outside `-r <requirements-file>` and the allowed flag set.
 has_inline_pip_args() {
   local cmd="$1"
-  local rest
-  # Extract the pip install segment up to any shell control operator (;, |, &)
-  rest=$(sed -E '
-    s/^.*[[:space:]]pip[0-9]*[[:space:]]+install([[:space:]]+|$)//;
-    s/^pip[0-9]*[[:space:]]+install([[:space:]]+|$)//;
-    s/[;&|].*$//;
-    s/(^|[[:space:]])--require-hashes([[:space:]]|$)/ /g;
-    s/(^|[[:space:]])--only-binary([[:space:]]+|=):all:([[:space:]]|$)/ /g;
-    s/(^|[[:space:]])(-r|--requirement)([[:space:]]+|=)["'"'"']?[^"'"'"'[:space:]]+["'"'"']?([[:space:]]|$)/ /g;
-    s/(^|[[:space:]])(-q|--quiet|--no-cache-dir|--disable-pip-version-check)([[:space:]]|$)/ /g;
-    s/(^|[[:space:]])(--retries|--timeout)([[:space:]]+|=)[0-9]+([[:space:]]|$)/ /g;
-    s/[[:space:]]+//g
-  ' <<< "$cmd")
-  [[ -n "$rest" ]]
+  awk '
+    function unquote(s) {
+      sub(/^["'"'"']/, "", s)
+      sub(/["'"'"']$/, "", s)
+      return s
+    }
+    {
+      sub(/^.*pip[0-9]*[[:space:]]+install([[:space:]]+|$)/, "")
+      sub(/[;&|].*$/, "")
+      n = split($0, tok, /[[:space:]]+/)
+      bad = 0
+      for (i = 1; i <= n; i++) {
+        t = unquote(tok[i])
+        if (t == "") continue
+        if (t ~ /^(--require-hashes|-q|--quiet|-v|--verbose|--no-cache-dir|--disable-pip-version-check|--no-deps|--isolated|--no-input|--no-color|--prefer-binary|-U|--upgrade|--force-reinstall|--ignore-installed|--no-warn-script-location)$/) {
+          continue
+        }
+        if (t == "--only-binary") {
+          if (i + 1 <= n && unquote(tok[i + 1]) == ":all:") {
+            i++
+            continue
+          }
+          bad = 1
+          break
+        }
+        if (t == "--only-binary=:all:") {
+          continue
+        }
+        if (t == "-r" || t == "--requirement") {
+          if (i + 1 <= n && unquote(tok[i + 1]) != "" && unquote(tok[i + 1]) !~ /^-/) {
+            i++
+            continue
+          }
+          bad = 1
+          break
+        }
+        if (t ~ /^(-r|--requirement)=.+$/ || t ~ /^-r[^=].*$/) {
+          continue
+        }
+        if (t ~ /^(--retries|--timeout|--index-url|--extra-index-url|--find-links|-f|--trusted-host|--target|-t|--root|--prefix|--cache-dir|--abi|--platform|--python-version|--implementation|--root-user-action)$/) {
+          if (i + 1 <= n && unquote(tok[i + 1]) != "") {
+            i++
+            continue
+          }
+          bad = 1
+          break
+        }
+        if (t ~ /^(--retries|--timeout|--index-url|--extra-index-url|--find-links|--trusted-host|--target|--root|--prefix|--cache-dir|--abi|--platform|--python-version|--implementation|--root-user-action)=.+$/) {
+          continue
+        }
+        bad = 1
+        break
+      }
+      exit (bad ? 0 : 1)
+    }
+  ' <<< "$cmd"
 }
 
 validate_requirements_file() {
@@ -77,34 +237,92 @@ validate_requirements_file() {
         }
         next
       }
+      sub(/[[:space:]]+#.*$/, "", line)
       has_cont = (line ~ /\\$/)
       if (has_cont) {
         sub(/[[:space:]]*\\$/, "", line)
       }
-      if (line ~ /^[A-Za-z0-9._-]+==[0-9][0-9A-Za-z._+-]*$/) {
-        if (in_cont) {
+
+      if (in_cont) {
+        if (line ~ /^[A-Za-z0-9._-]+(\[[A-Za-z0-9._,-]+\])?==/) {
           printf "expected --hash continuation before new package: %s\n", line
           bad = 1
-        }
-        if (pkg_count > 0 && current_hashes == 0) {
-          printf "package %s is missing --hash=sha256:<64-hex>\n", current_pkg
-          bad = 1
-        }
-        pkg_count++
-        current_pkg = line
-        current_hashes = 0
-        in_cont = has_cont
-      } else if (line ~ /^--hash=sha256:[0-9a-fA-F]{64}$/) {
-        if (!in_cont || pkg_count == 0) {
-          printf "hash line without preceding backslash continuation: %s\n", line
-          bad = 1
-        } else {
-          current_hashes++
           in_cont = has_cont
+          next
         }
+        n = split(line, htoks, /[[:space:]]+/)
+        cont_ok = (n > 0)
+        for (i = 1; i <= n; i++) {
+          if (htoks[i] !~ /^--hash=sha256:[0-9a-fA-F]{64}$/) {
+            cont_ok = 0
+          } else {
+            current_hashes++
+          }
+        }
+        if (!cont_ok) {
+          printf "unpinned or invalid requirement continuation line: %s\n", line
+          bad = 1
+        }
+        in_cont = has_cont
+        next
+      }
+
+      if (line ~ /^--hash=/) {
+        printf "hash line without preceding backslash continuation: %s\n", line
+        bad = 1
+        next
+      }
+
+      if (pkg_count > 0 && current_hashes == 0) {
+        printf "package %s is missing --hash=sha256:<64-hex>\n", current_pkg
+        bad = 1
+      }
+
+      rest = line
+      line_hashes = 0
+      line_bad_hash = 0
+      while (match(rest, /(^|[[:space:]])--hash=[^[:space:]]+/)) {
+        hstart = RSTART
+        hlen = RLENGTH
+        htok = substr(rest, hstart, hlen)
+        sub(/^[[:space:]]+/, "", htok)
+        if (htok ~ /^--hash=sha256:[0-9a-fA-F]{64}$/) {
+          line_hashes++
+        } else {
+          line_bad_hash = 1
+        }
+        rest = substr(rest, 1, hstart - 1) " " substr(rest, hstart + hlen)
+      }
+
+      sub(/^[[:space:]]+/, "", rest)
+      sub(/[[:space:]]+$/, "", rest)
+
+      line_bad_marker = 0
+      semi = index(rest, ";")
+      if (semi > 0) {
+        marker = substr(rest, semi + 1)
+        rest = substr(rest, 1, semi - 1)
+        sub(/^[[:space:]]+/, "", marker)
+        sub(/[[:space:]]+$/, "", marker)
+        sub(/[[:space:]]+$/, "", rest)
+        if (marker == "" || marker ~ /(^|[[:space:]])--/) {
+          line_bad_marker = 1
+        }
+      }
+
+      if (!line_bad_hash && !line_bad_marker &&
+          rest ~ /^[A-Za-z0-9._-]+(\[[A-Za-z0-9._,-]+\])?==[0-9][0-9A-Za-z._+!-]*$/) {
+        pkg_count++
+        current_pkg = rest
+        current_hashes = line_hashes
+        in_cont = has_cont
       } else {
         printf "unpinned or invalid requirement line: %s\n", line
         bad = 1
+        pkg_count++
+        current_pkg = rest != "" ? rest : line
+        current_hashes = (line_hashes > 0 ? line_hashes : 1)
+        in_cont = has_cont
       }
     }
     END {
@@ -140,8 +358,13 @@ fi
 # Collect every `pip install` invocation across target workflow(s) so each one
 # is held to the same hardening bar (no unpinned / source-buildable install slips in).
 WORKFLOW_TARGETS=("$CI_FILE")
+SCAN_DESC="$CI_FILE"
 if [[ $# -eq 0 && -d ".github/workflows" ]]; then
-  WORKFLOW_TARGETS=(.github/workflows/*.yml)
+  WORKFLOW_TARGETS=()
+  for candidate in .github/workflows/*.yml .github/workflows/*.yaml; do
+    [[ -f "$candidate" ]] && WORKFLOW_TARGETS+=("$candidate")
+  done
+  SCAN_DESC=".github/workflows/*.{yml,yaml}"
 fi
 
 PIP_LINES=()
@@ -149,12 +372,12 @@ for wf in "${WORKFLOW_TARGETS[@]}"; do
   [[ -f "$wf" ]] || continue
   while IFS= read -r pip_line; do
     [[ -n "$pip_line" ]] && PIP_LINES+=("${wf}:${pip_line}")
-  done < <(grep -nE 'pip[0-9]*[[:space:]]+install' "$wf" | grep -vE '^[0-9]+:[[:space:]]*(#|echo[[:space:]])' || true)
+  done < <(collect_pip_lines_from_file "$wf")
 done
 
 echo "Check 1: at least one pip install step exists to validate"
 if [[ ${#PIP_LINES[@]} -eq 0 ]]; then
-  error "$CI_FILE has no 'pip install' step — expected the PyYAML install"
+  error "$SCAN_DESC has no 'pip install' step — expected the PyYAML install"
 fi
 echo "$DONE_MSG"
 
@@ -174,14 +397,17 @@ for entry in "${PIP_LINES[@]}"; do
   if ! grep -qE -- '(^|[[:space:]])--require-hashes([[:space:]]|;|$)' <<< "$cmd"; then
     error "pip install missing '--require-hashes': $entry"
   fi
-  req_file=$(extract_req_file "$cmd")
-  if [[ -z "$req_file" ]]; then
+  cmd_req_files=()
+  while IFS= read -r req_file; do
+    [[ -n "$req_file" ]] && cmd_req_files+=("$req_file")
+  done < <(extract_req_files "$cmd")
+  if [[ ${#cmd_req_files[@]} -eq 0 ]]; then
     error "pip install missing '-r <requirements-file>': $entry"
   else
-    REQ_FILES+=("$req_file")
+    REQ_FILES+=("${cmd_req_files[@]}")
   fi
   if has_inline_pip_args "$cmd"; then
-    error "pip install passes inline package arguments outside '-r <requirements-file>': $entry"
+    error "pip install has inline package or unsupported arguments outside '-r <requirements-file>': $entry"
   fi
 done
 echo "$DONE_MSG"

@@ -48,22 +48,80 @@ fi
 echo "$DONE_MARK"
 
 echo "Check 2: the install still pins pyyaml with --require-hashes and --only-binary :all:"
+# Note: this is a retry-focused smoke check that the Install PyYAML step still
+# invokes pip with hash/binary flags and a requirements file pinning pyyaml.
+# Authoritative per-package version/hash validation across all workflow pip
+# commands and requirements files lives in tools/test-ci-dependency-hardening.sh.
 if ! grep -qiE 'pip[0-9]*[[:space:]]+install' <<< "$STEP_BLOCK"; then
   error "Install PyYAML step no longer contains a 'pip install' invocation"
 fi
-if ! grep -qE -- '(^|[[:space:]])--require-hashes([[:space:]]|;|$)' <<< "$STEP_BLOCK"; then
+if ! grep -qE -- '(^|[[:space:]])--require-hashes([[:space:]]|\\|;|$)' <<< "$STEP_BLOCK"; then
   error "Install PyYAML step no longer passes --require-hashes"
 fi
 if ! grep -qE -- '--only-binary([[:space:]]+|=):all:' <<< "$STEP_BLOCK"; then
   error "Install PyYAML step no longer passes --only-binary :all:"
 fi
-REQ_FILE=$(sed -nE 's/.*(^|[[:space:]])(-r|--requirement)([[:space:]]+|=)["'"'"']?([^"'"'"'[:space:];]+)["'"'"']?.*/\4/p' <<< "$STEP_BLOCK" | head -n 1)
-if [[ -z "$REQ_FILE" ]]; then
+STEP_REQ_FILES=()
+while IFS= read -r req_file; do
+  [[ -n "$req_file" ]] && STEP_REQ_FILES+=("$req_file")
+done < <(
+  awk '
+    {
+      sub(/[;&|].*$/, "")
+      n = split($0, tok, /[[:space:]]+/)
+      for (i = 1; i <= n; i++) {
+        t = tok[i]
+        sub(/^["'"'"']/, "", t)
+        sub(/["'"'"']$/, "", t)
+        if ((t == "-r" || t == "--requirement") && i + 1 <= n) {
+          v = tok[++i]
+          sub(/^["'"'"']/, "", v)
+          sub(/["'"'"']$/, "", v)
+          if (v != "") print v
+        } else if (t ~ /^(-r|--requirement)=/) {
+          sub(/^(-r|--requirement)=/, "", t)
+          sub(/^["'"'"']/, "", t)
+          sub(/["'"'"']$/, "", t)
+          if (t != "") print t
+        }
+      }
+    }
+  ' <<< "$STEP_BLOCK"
+)
+if [[ ${#STEP_REQ_FILES[@]} -eq 0 ]]; then
   error "Install PyYAML step no longer references a requirements file via -r <file>"
-elif [[ ! -f "$REQ_FILE" ]]; then
-  error "Install PyYAML step references missing requirements file: $REQ_FILE"
-elif ! grep -qiE '^pyyaml==[0-9]' "$REQ_FILE" || ! grep -qiE '^[[:space:]]*--hash=sha256:[0-9a-f]{64}' "$REQ_FILE"; then
-  error "Requirements file $REQ_FILE does not pin pyyaml==X.Y.Z with --hash=sha256: digests"
+else
+  pyyaml_pinned=false
+  for req_file in "${STEP_REQ_FILES[@]}"; do
+    if [[ ! -f "$req_file" ]]; then
+      error "Install PyYAML step references missing requirements file: $req_file"
+    elif awk '
+      BEGIN { in_pyyaml = 0; ok = 0 }
+      {
+        sub(/\r$/, "")
+        line = $0
+        sub(/^[[:space:]]+/, "", line)
+        sub(/[[:space:]]+$/, "", line)
+        if (line == "" || line ~ /^#/) next
+        has_cont = (line ~ /\\$/)
+        sub(/[[:space:]]*\\$/, "", line)
+        if (tolower(line) ~ /^pyyaml(\[[a-z0-9._,-]+\])?==[0-9]/) {
+          in_pyyaml = 1
+          if (line ~ /--hash=sha256:[0-9a-fA-F]{64}/) ok = 1
+          if (!has_cont) in_pyyaml = 0
+        } else if (in_pyyaml) {
+          if (line ~ /--hash=sha256:[0-9a-fA-F]{64}/) ok = 1
+          if (!has_cont) in_pyyaml = 0
+        }
+      }
+      END { exit (ok ? 0 : 1) }
+    ' "$req_file"; then
+      pyyaml_pinned=true
+    fi
+  done
+  if [[ "$pyyaml_pinned" != true ]]; then
+    error "Referenced requirements file(s) (${STEP_REQ_FILES[*]}) do not pin pyyaml==X.Y.Z with --hash=sha256: digests"
+  fi
 fi
 echo "$DONE_MARK"
 

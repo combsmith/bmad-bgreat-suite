@@ -9,10 +9,13 @@
 # dependency-audit reusable workflow does not misclassify this markdown/YAML
 # repository as a Python package project.
 #
-# To regenerate from the repo root:
+# To regenerate from the repo root (requires pip-tools: `pip install pip-tools`)
+# while preserving this header comment block:
+#   sed -n '1,/^[^#]/{ /^#/p; }' tools/ci-pyyaml-requirements.txt > /tmp/req.header
 #   printf 'PyYAML==6.0.2\n' > /tmp/req.in
 #   pip-compile --generate-hashes --no-annotate --no-header --strip-extras --allow-unsafe \
-#     /tmp/req.in -o tools/ci-pyyaml-requirements.txt
+#     /tmp/req.in -o /tmp/req.body
+#   cat /tmp/req.header /tmp/req.body > tools/ci-pyyaml-requirements.txt
 #
 # --require-hashes mode requires ALL resolved packages (including transitive
 # dependencies) to be listed here. Generated with pip-compile (pip-tools).
