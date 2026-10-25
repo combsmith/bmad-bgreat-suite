@@ -55,6 +55,8 @@ if ! grep -Eq '^[[:space:]]*schedule:[[:space:]]*$' "$WORKFLOW"; then
   error "$WORKFLOW has no weekly 'schedule:' trigger — settings must converge on a cadence"
 elif ! grep -Eq '^[[:space:]]*-[[:space:]]*cron:' "$WORKFLOW"; then
   error "$WORKFLOW declares 'schedule:' but defines no cron entry for the weekly self-heal"
+elif grep -E '^[[:space:]]*-[[:space:]]*cron:' "$WORKFLOW" | grep -Evq '^[[:space:]]*-[[:space:]]*cron:[[:space:]]*["'"'"']?([0-9]|[1-5][0-9])[[:space:]]+([0-9]|1[0-9]|2[0-3])[[:space:]]+\*[[:space:]]+\*[[:space:]]+([0-7]|SUN|MON|TUE|WED|THU|FRI|SAT|sun|mon|tue|wed|thu|fri|sat)["'"'"']?[[:space:]]*(#.*)?$'; then
+  error "$WORKFLOW cron entry must define a weekly schedule ('<min> <hour> * * <day-of-week>'), not a daily or other cadence"
 fi
 if ! grep -Eq '^[[:space:]]*workflow_dispatch:' "$WORKFLOW"; then
   error "$WORKFLOW has no 'workflow_dispatch:' trigger — settings must remain manually recoverable"
@@ -88,11 +90,20 @@ branches_ignore = push_block.get("branches-ignore")
 paths = push_block.get("paths")
 paths_ignore = push_block.get("paths-ignore")
 
-if not isinstance(branches, list) or TARGET_BRANCH not in branches:
+def target_is_included(patterns, target):
+    included = False
+    for pattern in patterns:
+        if pattern == target:
+            included = True
+        elif pattern == f"!{target}":
+            included = False
+    return included
+
+if not isinstance(branches, list) or not target_is_included(branches, TARGET_BRANCH):
     sys.exit(1)
 if isinstance(branches_ignore, list) and TARGET_BRANCH in branches_ignore:
     sys.exit(1)
-if not isinstance(paths, list) or TARGET_PATH not in paths:
+if not isinstance(paths, list) or not target_is_included(paths, TARGET_PATH):
     sys.exit(1)
 if isinstance(paths_ignore, list) and TARGET_PATH in paths_ignore:
     sys.exit(1)
