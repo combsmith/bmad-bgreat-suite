@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
-# Validates that the codified pr-quality ruleset and its self-healing applier are
-# present and in compliance with the org standard (standards/github-settings.md)
-# and OpenSSF Scorecard Branch-Protection requirements (issue #157). The live
-# ruleset on the repo is converged by scripts/apply-rulesets.sh, which reads
-# standards/rulesets/*.json as the source of truth.
+# Validates that the codified pr-quality ruleset, its CODEOWNERS prerequisite,
+# and its self-healing applier are present and in compliance with the org
+# standards (standards/github-settings.md, standards/codeowners-standard.md)
+# and OpenSSF Scorecard Branch-Protection (issue #157) and Code-Review
+# (issue #336) requirements. The live ruleset on the repo is converged by
+# scripts/apply-rulesets.sh, which reads standards/rulesets/*.json as the
+# source of truth.
 set -euo pipefail
 
 ERRORS=0
 RULESET="${1:-${RULESET:-standards/rulesets/pr-quality.json}}"
 APPLIER="${2:-${APPLIER:-scripts/apply-rulesets.sh}}"
 WORKFLOW="${3:-${WORKFLOW:-.github/workflows/apply-repo-settings.yml}}"
+CODEOWNERS_FILE="${4:-${CODEOWNERS_FILE:-CODEOWNERS}}"
 readonly DONE_MARK="  done."
 
+# Record a validation error message to stderr and increment ERRORS.
+# Arguments:
+#   $1 - Error message to report.
 error() {
   local msg="$1"
   echo "ERROR: $msg" >&2
   ERRORS=$((ERRORS + 1))
+  return 0
 }
 
 echo "=== pr-quality ruleset — compliance coverage check ==="
@@ -32,9 +39,10 @@ echo "$DONE_MARK"
 
 # Check 2: the pull_request rule requires dismiss_stale_reviews_on_push and all
 # org-standard review/merge controls (compliance check
-# ruleset-drift-pr-quality-dismiss_stale_reviews_on_push, issues #427, #445, #447, #453, #461).
+# ruleset-drift-pr-quality-dismiss_stale_reviews_on_push, issues #427, #445, #447, #453, #461;
+# OpenSSF Scorecard Code-Review, issue #336).
 echo ""
-echo "Check 2: pull_request rule sets dismiss_stale_reviews_on_push to true"
+echo "Check 2: pull_request rule sets dismiss_stale_reviews_on_push to true and enforces distinct Code-Review controls (#336)"
 if [[ -f "$RULESET" ]]; then
   if ! python3 - "$RULESET" <<'PY'
 import json, sys
@@ -50,8 +58,8 @@ if not isinstance(rules, list):
     sys.exit("rules must be a list")
 
 pr_rules = [r for r in rules if isinstance(r, dict) and r.get("type") == "pull_request"]
-if not pr_rules:
-    sys.exit("no pull_request rule found")
+if len(pr_rules) != 1:
+    sys.exit("rules must contain exactly one pull_request rule")
 
 for rule in pr_rules:
     params = rule.get("parameters")
@@ -202,6 +210,75 @@ PY
   fi
 else
   error "Cannot check Branch-Protection Tier 1 controls — $RULESET is missing"
+fi
+echo "$DONE_MARK"
+
+# Check 6: CODEOWNERS exists, is unshadowed, ends with a trailing newline, and
+# complies with combsmith/.github/standards/codeowners-standard.md so that
+# require_code_owner_review: true in pr-quality enforces distinct code-owner
+# approval across all paths (OpenSSF Scorecard Code-Review, issue #336).
+echo ""
+echo "Check 6: $CODEOWNERS_FILE exists, is unshadowed, and complies with codeowners-standard.md (Scorecard Code-Review #336)"
+if [[ "$CODEOWNERS_FILE" == "CODEOWNERS" || "$CODEOWNERS_FILE" == "./CODEOWNERS" ]]; then
+  for shadow_path in ".github/CODEOWNERS" "docs/CODEOWNERS"; do
+    if [[ -e "$shadow_path" ]]; then
+      error "Shadow CODEOWNERS file exists at $shadow_path — keep a single canonical CODEOWNERS file"
+    fi
+  done
+fi
+if [[ ! -f "$CODEOWNERS_FILE" ]]; then
+  error "Missing $CODEOWNERS_FILE — require_code_owner_review in $RULESET has no effect without a CODEOWNERS file (Scorecard Code-Review #336)"
+elif ! python3 - "$CODEOWNERS_FILE" <<'PY'
+import re, sys
+
+path = sys.argv[1]
+try:
+    with open(path, "rb") as fh:
+        raw = fh.read()
+except OSError as exc:
+    sys.exit(f"failed to read CODEOWNERS from {path}: {exc}")
+
+if not raw:
+    sys.exit("CODEOWNERS file is empty")
+
+if not raw.endswith(b"\n"):
+    sys.exit("CODEOWNERS file must end with a trailing newline (POSIX text file)")
+
+try:
+    text = raw.decode("utf-8")
+except UnicodeDecodeError as exc:
+    sys.exit(f"CODEOWNERS is not valid UTF-8: {exc}")
+
+owner_lines = []
+for lineno, raw_line in enumerate(text.splitlines(), start=1):
+    stripped = raw_line.strip()
+    if not stripped or stripped.startswith("#"):
+        continue
+    tokens = stripped.split()
+    if len(tokens) < 2:
+        sys.exit(f"line {lineno} has pattern {tokens[0]!r} with no owners")
+    pattern, owners = tokens[0], tokens[1:]
+    if owners[0] != "@combsmith/org-leads":
+        sys.exit(
+            f"line {lineno}: '@combsmith/org-leads' must be the first owner, got {owners[0]!r}"
+        )
+    for owner in owners:
+        if not re.match(r"^@combsmith/[a-z0-9][a-z0-9_-]*$", owner):
+            sys.exit(
+                f"line {lineno}: forbidden owner {owner!r} — only @combsmith/<team-slug> teams are allowed"
+            )
+    owner_lines.append((lineno, pattern, owners))
+
+if not owner_lines:
+    sys.exit("CODEOWNERS file has no owner lines (only comments/blank)")
+
+if not any(pattern == "*" for _, pattern, _ in owner_lines):
+    sys.exit(
+        "CODEOWNERS has no default '*' catch-all pattern — require_code_owner_review will not cover all paths"
+    )
+PY
+then
+  error "$CODEOWNERS_FILE does not comply with standards/codeowners-standard.md (Scorecard Code-Review #336)"
 fi
 echo "$DONE_MARK"
 
