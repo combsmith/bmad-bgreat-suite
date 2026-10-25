@@ -30,6 +30,12 @@
         "require_last_push_approval": true,
         "allowed_merge_methods": ["squash"]
       }
+    },
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
     }
   ]
 }
