@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Validates that the PyYAML install in .github/workflows/ci.yml is hardened
-# against transient network/PyPI failures (Fleet Monitor issue #381).
+# against transient network/PyPI failures (Fleet Monitor issue #381) while
+# preserving binary-only and SHA-256 hash-locked installation (issues #358, #378).
 #
 # The Install PyYAML step is the only network-dependent operation in the CI
 # workflow. Without a retry, a single PyPI hiccup fails the whole run and shows
@@ -9,12 +10,12 @@
 set -euo pipefail
 
 ERRORS=0
-CI_FILE=".github/workflows/ci.yml"
+CI_FILE="${1:-.github/workflows/ci.yml}"
 readonly DONE_MARK="  done."
 
 error() {
   local message="$1"
-  echo "ERROR: $message" >&2
+  printf "ERROR: %s\n" "$message" >&2
   ERRORS=$((ERRORS + 1))
 }
 
@@ -46,15 +47,23 @@ if [[ -z "$STEP_BLOCK" ]]; then
 fi
 echo "$DONE_MARK"
 
-echo "Check 2: the install still pins pyyaml with --only-binary :all:"
+echo "Check 2: the install still pins pyyaml with --require-hashes and --only-binary :all:"
 if ! grep -qiE 'pip[0-9]*[[:space:]]+install' <<< "$STEP_BLOCK"; then
   error "Install PyYAML step no longer contains a 'pip install' invocation"
 fi
-if ! grep -qiE 'pyyaml==[0-9]' <<< "$STEP_BLOCK"; then
-  error "Install PyYAML step no longer pins an exact pyyaml version (pyyaml==X.Y.Z)"
+if ! grep -qE -- '(^|[[:space:]])--require-hashes([[:space:]]|;|$)' <<< "$STEP_BLOCK"; then
+  error "Install PyYAML step no longer passes --require-hashes"
 fi
 if ! grep -qE -- '--only-binary([[:space:]]+|=):all:' <<< "$STEP_BLOCK"; then
   error "Install PyYAML step no longer passes --only-binary :all:"
+fi
+REQ_FILE=$(sed -nE 's/.*(^|[[:space:]])(-r|--requirement)([[:space:]]+|=)["'"'"']?([^"'"'"'[:space:];]+)["'"'"']?.*/\4/p' <<< "$STEP_BLOCK" | head -n 1)
+if [[ -z "$REQ_FILE" ]]; then
+  error "Install PyYAML step no longer references a requirements file via -r <file>"
+elif [[ ! -f "$REQ_FILE" ]]; then
+  error "Install PyYAML step references missing requirements file: $REQ_FILE"
+elif ! grep -qiE '^pyyaml==[0-9]' "$REQ_FILE" || ! grep -qiE '^[[:space:]]*--hash=sha256:[0-9a-f]{64}' "$REQ_FILE"; then
+  error "Requirements file $REQ_FILE does not pin pyyaml==X.Y.Z with --hash=sha256: digests"
 fi
 echo "$DONE_MARK"
 
