@@ -23,9 +23,11 @@ jobs:
       - name: Install PyYAML
         # Retry to absorb transient PyPI/network hiccups so a single failed
         # download does not fail the whole CI run (Fleet Monitor issue #381).
+        # Pin with --require-hashes and --only-binary :all: to satisfy OpenSSF
+        # Scorecard Pinned-Dependencies (issue #378) and SonarCloud S8541/S8544 (issue #358).
         run: |
           for attempt in 1 2 3; do
-            if pip install --only-binary :all: pyyaml==6.0.2; then
+            if pip install --require-hashes --only-binary :all: -r tools/ci-pyyaml-requirements.txt; then
               exit 0
             fi
             if [[ $attempt -lt 3 ]]; then
