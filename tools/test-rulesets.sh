@@ -214,9 +214,10 @@ fi
 echo "$DONE_MARK"
 
 # Check 6: CODEOWNERS exists, is unshadowed, ends with a trailing newline, and
-# complies with combsmith/.github/standards/codeowners-standard.md so that
-# require_code_owner_review: true in pr-quality enforces distinct code-owner
-# approval across all paths (OpenSSF Scorecard Code-Review, issue #336).
+# complies with combsmith/.github/standards/codeowners-standard.md. The
+# pr-quality ruleset enforces distinct approval; this check enforces the
+# CODEOWNERS compliance prerequisite that makes require_code_owner_review: true
+# effective across all paths (OpenSSF Scorecard Code-Review, issue #336).
 echo ""
 echo "Check 6: $CODEOWNERS_FILE exists, is unshadowed, and complies with codeowners-standard.md (Scorecard Code-Review #336)"
 if [[ "$CODEOWNERS_FILE" == "CODEOWNERS" || "$CODEOWNERS_FILE" == "./CODEOWNERS" ]]; then

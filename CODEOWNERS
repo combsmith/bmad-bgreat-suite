@@ -2,8 +2,8 @@
 # Standard: use the @combsmith/org-leads team for all code owner
 # assignments. See combsmith/.github standards/codeowners-standard.md
 #
-# Default catch-all — ensures every file has an owner so
-# require_code_owner_review in pr-quality applies to all paths
-# and enforces distinct reviewer approval (Scorecard Code-Review #336).
+# Default catch-all — ensures every file has an owner so the
+# require_code_owner_review control in the pr-quality ruleset
+# applies across all repository paths (Scorecard Code-Review #336).
 
 * @combsmith/org-leads
