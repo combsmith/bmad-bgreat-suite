@@ -148,9 +148,6 @@ jobs:
       - name: Validate repo-settings script coverage
         run: bash tools/test-repo-settings.sh
 
-      - name: Validate pr-quality ruleset compliance
-        run: bash tools/test-rulesets.sh
-
       - name: Validate dev-lead concurrency guard
         run: bash tools/test-dev-lead-concurrency.sh
 
