@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Validates that .github/workflows/apply-repo-settings.yml follows the
 # canonical org thin-caller-stub contract (combsmith/.github#984, issue #440)
-# and that the diverged local script fork (scripts/apply-repo-settings.sh)
-# has been removed.
+# and that diverged local settings/ruleset forks (scripts/apply-repo-settings.sh,
+# scripts/apply-rulesets.sh, standards/rulesets/pr-quality.json,
+# tools/test-rulesets.sh) have been removed in favor of central org enforcement.
 set -euo pipefail
 
 ERRORS=0
@@ -23,11 +24,13 @@ error() {
 echo "=== apply-repo-settings.yml — thin caller stub & fork removal check ==="
 echo ""
 
-# Check 1: diverged local script fork is removed (consumer repos carry no script copy)
-echo "Check 1: diverged local fork $LEGACY_SCRIPT is removed"
-if [[ -e "$LEGACY_SCRIPT" ]]; then
-  error "$LEGACY_SCRIPT still exists — consumer repos must not carry a local apply-repo-settings.sh fork (use the org reusable workflow)"
-fi
+# Check 1: diverged local script/ruleset forks are removed (consumer repos carry no local copies)
+echo "Check 1: diverged local settings and ruleset forks are removed"
+for legacy_path in "$LEGACY_SCRIPT" "scripts/apply-rulesets.sh" "standards/rulesets/pr-quality.json" "tools/test-rulesets.sh"; do
+  if [[ -e "$legacy_path" ]]; then
+    error "$legacy_path still exists — consumer repos must not carry local settings/ruleset forks (enforced centrally via combsmith/.github)"
+  fi
+done
 echo "$DONE_MARK"
 
 # Check 2: workflow file exists and uses canonical name "Apply repo settings"
