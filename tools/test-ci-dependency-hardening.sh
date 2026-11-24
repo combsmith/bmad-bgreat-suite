@@ -428,6 +428,18 @@ if [[ -f "package.json" && ! -f "$LOCK_FILE" ]]; then
 fi
 echo "$DONE_MSG"
 
+echo "Check 6: PyYAML stays pinned to 6.0.3 (6.0.2 has no Python 3.14 wheel on ubuntu-26.04)"
+PYYAML_REQ="tools/ci-pyyaml-requirements.txt"
+PYYAML_REQUIRED="6.0.3"
+for req_file in "${REQ_FILES[@]}"; do
+  if [[ "$req_file" == "$PYYAML_REQ" ]]; then
+    if ! grep -qiE "^pyyaml==${PYYAML_REQUIRED//./\\.}([[:space:]]|\\\\|$)" "$req_file"; then
+      error "$req_file must pin pyyaml==$PYYAML_REQUIRED (Python 3.14 wheel availability)"
+    fi
+  fi
+done
+echo "$DONE_MSG"
+
 echo ""
 if [[ "$ERRORS" -gt 0 ]]; then
   echo "dependency hardening check failed with $ERRORS error(s)" >&2
