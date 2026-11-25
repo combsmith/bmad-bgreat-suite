@@ -74,9 +74,24 @@ git clone https://github.com/combsmith/bmad-bgreat-suite
 npx bmad-method install --custom-source ./bmad-bgreat-suite
 ```
 
-Add `--modules bmm --tools claude-code --yes` (or your own tool IDs) for a
-non-interactive install. The installer marks custom modules as unverified:
-they have not been reviewed by the BMad team.
+Add `--modules bmm --tools claude-code --directory . --yes` (or your own tool
+IDs) for a non-interactive install. `--directory .` is needed on installer
+versions before v6.12.2, which otherwise stop at the directory prompt. The
+installer marks custom modules as unverified: they have not been reviewed by
+the BMad team.
+
+**Existing installs.** If `_bmad/` already exists, the installer menu defaults
+to **Quick Update**, which does not resolve `--custom-source`: the command
+finishes without error and installs nothing. Select **Modify BMAD
+Installation** at the menu. For a non-interactive run, add `--action update`.
+This applies to both commands above.
+
+**Installed modules can be removed.** On an existing installation, installing
+with `--custom-source` keeps only `core` and the custom modules, and removes
+other installed modules (such as `bmm`) without asking. `--modules` sets the
+exact module set, so it removes any module it does not list. To keep your
+installed modules, pass `--yes` without `--modules`, or list every module to
+keep in `--modules`.
 
 There is no npm package; install from GitHub or a local clone.
 
