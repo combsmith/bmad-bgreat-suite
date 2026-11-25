@@ -83,7 +83,7 @@ There is no npm package; install from GitHub or a local clone.
 ### BMad v7 preview
 
 Not yet supported. `npx skills add combsmith/bmad-bgreat-suite` copies the
-skills, but v7's `bmad setup` does not recognise them as a module: it asks
+skills, but v7's `bmad setup` does not recognize them as a module: it asks
 none of the configuration questions below and does not write
 `_bmad/bgr/config.yaml`, which every workflow loads first. Use v6 until the
 suite is ported to v7's module format.
