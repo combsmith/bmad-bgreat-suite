@@ -53,19 +53,40 @@ Multiple tracks can run in parallel after the architecture is defined.
 
 ## Installation
 
-### As a custom module (local path)
+Requires BMad Method **v6.7 or later** (tested on v6.12.4). Since v6.7, custom
+modules install with `--custom-source`; the old `--custom-content` flag and the
+community module picker are gone.
+
+### From GitHub
 
 ```bash
-npx bmad-method install --custom-content /path/to/bmad-bgreat-suite/src
+npx bmad-method install --custom-source https://github.com/combsmith/bmad-bgreat-suite
 ```
 
-### As an npm package (once published)
+### From a local clone
+
+Point `--custom-source` at the **repository root** (the folder that holds
+`.claude-plugin/marketplace.json`), not at `src/`. Pointing at `src/` finds no
+module and installs nothing, without an error.
 
 ```bash
-npm install bmad-bgreat-suite
-npx bmad-method install
-# Select "BMad BGreat Suite" from the module list
+git clone https://github.com/combsmith/bmad-bgreat-suite
+npx bmad-method install --custom-source ./bmad-bgreat-suite
 ```
+
+Add `--modules bmm --tools claude-code --yes` (or your own tool IDs) for a
+non-interactive install. The installer marks custom modules as unverified:
+they have not been reviewed by the BMad team.
+
+There is no npm package; install from GitHub or a local clone.
+
+### BMad v7 preview
+
+Not yet supported. `npx skills add combsmith/bmad-bgreat-suite` copies the
+skills, but v7's `bmad setup` does not recognise them as a module: it asks
+none of the configuration questions below and does not write
+`_bmad/bgr/config.yaml`, which every workflow loads first. Use v6 until the
+suite is ported to v7's module format.
 
 ## Configuration
 
@@ -137,7 +158,7 @@ Each workflow follows BMAD's micro-file architecture: a `workflow.md` orchestrat
 
 ## Requirements
 
-- [BMad Method](https://github.com/bmad-code-org/BMAD-METHOD) v6+
+- [BMad Method](https://github.com/bmad-code-org/BMAD-METHOD) v6.7 or later (v7 preview not yet supported)
 - Core module (required)
 - BMad Method module (recommended — enables CA and IR cross-references)
 

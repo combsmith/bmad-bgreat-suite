@@ -68,7 +68,7 @@ src/
 ### Module Registration
 
 - New agents must be added to module-help.csv with correct phase, dependencies, and menu code
-- New workflows must specify `after:` dependencies accurately
+- New workflows must specify `preceded-by` dependencies in module-help.csv accurately
 - Module.yaml must reflect the correct agent/workflow counts
 
 ### Security
