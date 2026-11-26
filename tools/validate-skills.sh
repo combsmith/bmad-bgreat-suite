@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Skill Validator for BMad BGreat Suite
+# Skill Validator for BHappy Ops Suite
 # Runs deterministic structural checks on all skills and workflows.
 # Exit 0 = all checks pass, Exit 1 = failures found.
 set -euo pipefail
@@ -14,7 +14,7 @@ error() {
   ERRORS=$((ERRORS + 1))
 }
 
-echo "=== BMad BGreat Suite — Skill Validator ==="
+echo "=== BHappy Ops Suite — Skill Validator ==="
 echo ""
 
 # ---------------------------------------------------------------------------

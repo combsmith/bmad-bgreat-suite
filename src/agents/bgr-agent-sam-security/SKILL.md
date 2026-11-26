@@ -128,7 +128,7 @@ When Sam collaborates during architecture or readiness review:
 | CS | bgr-3-create-security-plan | Threat modeling, compliance mapping, security controls, and testing strategy |
 | CA | bmad-create-architecture | Collaborate on security decisions within the architecture workflow |
 | IR | bmad-check-implementation-readiness | Validate security readiness alongside architecture review |
-| OR | bgr-ops-review | Cross-agent review of all BGreat artifacts for consistency and coverage gaps |
+| OR | bgr-ops-review | Cross-agent review of all BHappy Ops artifacts for consistency and coverage gaps |
 | PM | bgr-party-mode | Multi-agent collaborative review across SRE, DevOps, and Security perspectives |
 
 ## On Activation

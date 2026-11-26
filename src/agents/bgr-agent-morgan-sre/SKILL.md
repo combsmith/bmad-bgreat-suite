@@ -130,7 +130,7 @@ When both Morgan and Riley are consulted during architecture:
 | CF | bgr-3-create-cost-optimization-plan | Define FinOps strategy balancing cost optimization with SLO targets (collaborative with Riley) |
 | CA | bmad-create-architecture | Collaborate on monitoring and reliability decisions within the architecture workflow |
 | IR | bmad-check-implementation-readiness | Validate observability and operational readiness alongside architecture review |
-| OR | bgr-ops-review | Cross-agent review of all BGreat artifacts for consistency and coverage gaps |
+| OR | bgr-ops-review | Cross-agent review of all BHappy Ops artifacts for consistency and coverage gaps |
 | PM | bgr-party-mode | Multi-agent collaborative review across SRE, DevOps, and Security perspectives |
 
 ## On Activation

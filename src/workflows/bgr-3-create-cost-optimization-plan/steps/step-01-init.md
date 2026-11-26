@@ -118,7 +118,7 @@ Look for `{bgr_artifacts}/production-readiness-checklist.md`:
 
 ### 4. Load Context from Completed Workflow Artifacts
 
-Check `{bgr_artifacts}/` for previously completed BGreat workflow outputs:
+Check `{bgr_artifacts}/` for previously completed BHappy Ops workflow outputs:
 
 - `*infrastructure*.md` — If completed, load environment topology, cloud provider choices, compute resources, and instance types to inform right-sizing recommendations and reserved instance strategy
 - `*observability*.md` — If completed, load SLO targets, metrics taxonomy, and alerting thresholds to inform cost-aware SLO trade-offs and anomaly detection alignment

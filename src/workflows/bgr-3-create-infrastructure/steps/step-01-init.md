@@ -50,7 +50,7 @@ Look for `{bgr_artifacts}/production-readiness-checklist.md`:
 
 ### 3. Load Context from Completed Workflow Artifacts
 
-Check `{bgr_artifacts}/` for previously completed BGreat workflow outputs:
+Check `{bgr_artifacts}/` for previously completed BHappy Ops workflow outputs:
 
 - `*observability*.md` — If completed, load metrics strategy and SLO definitions to inform monitoring targets, agent deployment requirements, and network egress for telemetry data
 - `*incident-response*.md` — If completed, load severity classification and on-call procedures to inform environment isolation requirements and access control decisions

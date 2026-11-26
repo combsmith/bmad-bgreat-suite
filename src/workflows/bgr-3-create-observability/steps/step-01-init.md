@@ -50,7 +50,7 @@ Look for `{bgr_artifacts}/production-readiness-checklist.md`:
 
 ### 3. Load Context from Completed Workflow Artifacts
 
-Check `{bgr_artifacts}/` for previously completed BGreat workflow outputs:
+Check `{bgr_artifacts}/` for previously completed BHappy Ops workflow outputs:
 
 - `*incident-response*.md` — If completed, note severity classification and alerting thresholds that observability should align with
 - `*infrastructure*.md` — If completed, note environment topology and monitoring targets for instrumentation planning
