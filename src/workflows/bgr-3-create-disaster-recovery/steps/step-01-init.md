@@ -65,7 +65,7 @@ Look for `{bgr_artifacts}/production-readiness-checklist.md`:
 
 ### 4. Load Context from Completed Workflow Artifacts
 
-Check `{bgr_artifacts}/` for previously completed BGreat workflow outputs:
+Check `{bgr_artifacts}/` for previously completed BHappy Ops workflow outputs:
 
 - `*observability*.md` — If completed, load SLO targets and alerting thresholds to align RTO/RPO definitions with existing reliability targets
 - `*incident-response*.md` — If completed, load severity classification and escalation paths to align DR communication procedures with incident response workflows

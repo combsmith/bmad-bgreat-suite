@@ -1,13 +1,13 @@
 ---
 name: bgr-ops-review
-description: 'Cross-agent operations review that lints all BGreat artifacts for consistency, coverage gaps, and staleness. Use when the user says "review operations artifacts" or "run ops review" or "check artifact consistency"'
+description: 'Cross-agent operations review that lints all BHappy Ops artifacts for consistency, coverage gaps, and staleness. Use when the user says "review operations artifacts" or "run ops review" or "check artifact consistency"'
 ---
 
 # Operations Review
 
 ## Overview
 
-This skill performs a cross-agent operations review across all BGreat artifacts in `{bgr_artifacts}/`. It reads every produced artifact, cross-references decisions and definitions across plans, detects coverage gaps and stale content, and produces a structured markdown report with pass/warn/fail verdicts per check.
+This skill performs a cross-agent operations review across all BHappy Ops artifacts in `{bgr_artifacts}/`. It reads every produced artifact, cross-references decisions and definitions across plans, detects coverage gaps and stale content, and produces a structured markdown report with pass/warn/fail verdicts per check.
 
 This skill is read-only with respect to existing artifacts — it analyzes them without modification and writes a new report to `{bgr_artifacts}/ops-review-report.md`.
 

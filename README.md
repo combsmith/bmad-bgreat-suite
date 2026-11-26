@@ -1,4 +1,6 @@
-# BMad BGreat Suite
+# BHappy Ops Suite
+
+*A BMad Community Module, compatible with BMad Method. Not affiliated with or endorsed by BMad Code.*
 
 [![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/combsmith/.github/blob/main/CONTRIBUTING.md)
 
