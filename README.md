@@ -86,12 +86,13 @@ finishes without error and installs nothing. Select **Modify BMAD
 Installation** at the menu. For a non-interactive run, add `--action update`.
 This applies to both commands above.
 
-**Installed modules can be removed.** On an existing installation, installing
-with `--custom-source` keeps only `core` and the custom modules, and removes
-other installed modules (such as `bmm`) without asking. `--modules` sets the
-exact module set, so it removes any module it does not list. To keep your
-installed modules, pass `--yes` without `--modules`, or list every module to
-keep in `--modules`.
+**Installed modules can be removed.** On an existing installation, running
+`--custom-source` without `--yes` and without `--modules` keeps only `core` and
+the custom modules, and removes other installed modules (such as `bmm`)
+without asking. `--modules` sets the exact module set, so it also removes any
+module it does not list. To keep your installed modules, either add `--yes`
+and leave out `--modules` (installed modules are kept and the defaults are
+added), or pass `--modules` listing every module to keep.
 
 There is no npm package; install from GitHub or a local clone.
 
