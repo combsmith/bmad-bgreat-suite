@@ -1,11 +1,11 @@
-# BMad BGreat Suite — Agent Development Standards
+# BHappy Ops Suite — Agent Development Standards
 
 > Extends the org-level standards at [combsmith/.github/AGENTS.md](https://github.com/combsmith/.github/blob/main/AGENTS.md).
-> This file defines project-specific conventions for the BGreat Suite module.
+> This file defines project-specific conventions for the BHappy Ops Suite module.
 
 ## Project Overview
 
-The BMad BGreat Suite is a BMAD Method extension module providing three
+The BHappy Ops Suite is a BMAD Method extension module providing three
 specialized AI agents (Morgan/SRE, Riley/DevOps, Sam/Security) and eight
 guided workflows for production readiness planning. The codebase is
 content-only: markdown workflow definitions, YAML configuration, and
@@ -68,7 +68,7 @@ src/
 ### Module Registration
 
 - New agents must be added to module-help.csv with correct phase, dependencies, and menu code
-- New workflows must specify `after:` dependencies accurately
+- New workflows must specify `preceded-by` dependencies in module-help.csv accurately
 - Module.yaml must reflect the correct agent/workflow counts
 
 ### Security

@@ -1,8 +1,8 @@
-# Copilot Instructions — BMad BGreat Suite
+# Copilot Instructions — BHappy Ops Suite
 
 ## About
 
-BMad BGreat Suite is a BMAD Method extension module providing three specialized AI agents (Morgan/SRE, Riley/DevOps, Sam/Security) and eight guided workflows for production readiness planning.
+BHappy Ops Suite is a BMAD Method extension module providing three specialized AI agents (Morgan/SRE, Riley/DevOps, Sam/Security) and eight guided workflows for production readiness planning.
 
 ## Tech Stack
 

@@ -11,7 +11,7 @@
     {
       "name": "bmad-bgreat-suite",
       "source": "./",
-      "description": "BGreat Suite -- SRE, DevOps, and Security agents (Morgan, Riley, Sam) with ten guided workflows, cross-agent operations review, and multi-agent party mode for production readiness. Part of the BMad Method ecosystem.",
+      "description": "BHappy Ops Suite -- SRE, DevOps, and Security agents (Morgan, Riley, Sam) with ten guided workflows, cross-agent operations review, and multi-agent party mode for production readiness. Part of the BMad Method ecosystem.",
       "version": "0.1.0",
       "author": {
         "name": "Don Petry"

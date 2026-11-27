@@ -18,7 +18,7 @@ Look for `{bgr_artifacts}/production-readiness-checklist.md`:
 
 ## 1.2 Load Context from Completed Workflow Artifacts
 
-Check `{bgr_artifacts}/` for previously completed BGreat workflow outputs:
+Check `{bgr_artifacts}/` for previously completed BHappy Ops workflow outputs:
 
 - `*observability*.md` -- If completed, load SLO definitions and health check metrics to inform post-deploy verification gates and canary analysis criteria
 - `*incident-response*.md` -- If completed, load severity classification and rollback triggers to align pipeline rollback automation with incident escalation thresholds

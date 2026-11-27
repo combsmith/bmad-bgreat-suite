@@ -7,7 +7,7 @@ description: 'Multi-agent operations party mode where Morgan (SRE), Riley (DevOp
 
 ## Overview
 
-This skill orchestrates a multi-agent collaborative review session across the BGreat Suite personas — **Morgan** (SRE Lead), **Riley** (DevOps Lead), and **Sam** (Security Lead). Inspired by the BMAD Method party mode pattern, the orchestrator spawns independent subagents for each participating lead so they analyze operational plans, architecture decisions, incident postmortems, or production readiness from their authentic domain perspective without anchoring on or blending with one another.
+This skill orchestrates a multi-agent collaborative review session across the BHappy Ops Suite personas — **Morgan** (SRE Lead), **Riley** (DevOps Lead), and **Sam** (Security Lead). Inspired by the BMAD Method party mode pattern, the orchestrator spawns independent subagents for each participating lead so they analyze operational plans, architecture decisions, incident postmortems, or production readiness from their authentic domain perspective without anchoring on or blending with one another.
 
 This skill is read-only with respect to existing operational artifacts — it analyzes them without modification and writes a new session synthesis report to `{bgr_artifacts}/party-mode-report.md`.
 
@@ -17,7 +17,7 @@ Any agent (Morgan, Riley, or Sam) or the user directly via menu code `PM`. When 
 
 ## Use Cases
 
-1. **Plan Review Gate** — Before marking any BGreat plan as complete, review it from all relevant perspectives (e.g., Riley and Sam reviewing Morgan's Observability Plan for infrastructure alignment and telemetry data security).
+1. **Plan Review Gate** — Before marking any BHappy Ops plan as complete, review it from all relevant perspectives (e.g., Riley and Sam reviewing Morgan's Observability Plan for infrastructure alignment and telemetry data security).
 2. **Architecture Input** — All three agents contribute their domain requirements, probing questions, and constraints to system architecture decisions (`bmad-create-architecture`).
 3. **Incident Post-Mortem** — Multi-perspective blameless analysis of production incidents across detection and response (Morgan), deployment and infrastructure triggers (Riley), and blast-radius or security implications (Sam).
 4. **Production Readiness Assessment** — Holistic cross-domain verification across all `{bgr_artifacts}/` plans and the production readiness checklist prior to launch (`bmad-check-implementation-readiness`).

@@ -156,7 +156,7 @@ If ANY of these checks fail, Riley MUST flag them as blocking issues that preven
 | CF | bgr-3-create-cost-optimization-plan | Define infrastructure cost optimization, right-sizing, and reserved capacity strategy (collaborative with Morgan) |
 | CA | bmad-create-architecture | Collaborate on infrastructure and deployment decisions within the architecture workflow |
 | IR | bmad-check-implementation-readiness | Validate infrastructure and pipeline readiness alongside architecture review |
-| OR | bgr-ops-review | Cross-agent review of all BGreat artifacts for consistency and coverage gaps |
+| OR | bgr-ops-review | Cross-agent review of all BHappy Ops artifacts for consistency and coverage gaps |
 | PM | bgr-party-mode | Multi-agent collaborative review across SRE, DevOps, and Security perspectives |
 
 ## On Activation

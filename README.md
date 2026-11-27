@@ -1,4 +1,6 @@
-# BMad BGreat Suite
+# BHappy Ops Suite
+
+*A BMad Community Module, compatible with BMad Method. Not affiliated with or endorsed by BMad Code.*
 
 [![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/combsmith/.github/blob/main/CONTRIBUTING.md)
 
@@ -53,19 +55,56 @@ Multiple tracks can run in parallel after the architecture is defined.
 
 ## Installation
 
-### As a custom module (local path)
+Requires BMad Method **v6.7 or later** (tested on v6.12.4). Since v6.7, custom
+modules install with `--custom-source`; the old `--custom-content` flag and the
+community module picker are gone.
+
+### From GitHub
 
 ```bash
-npx bmad-method install --custom-content /path/to/bmad-bgreat-suite/src
+npx bmad-method install --custom-source https://github.com/combsmith/bmad-bgreat-suite
 ```
 
-### As an npm package (once published)
+### From a local clone
+
+Point `--custom-source` at the **repository root** (the folder that holds
+`.claude-plugin/marketplace.json`), not at `src/`. Pointing at `src/` finds no
+module and installs nothing, without an error.
 
 ```bash
-npm install bmad-bgreat-suite
-npx bmad-method install
-# Select "BMad BGreat Suite" from the module list
+git clone https://github.com/combsmith/bmad-bgreat-suite
+npx bmad-method install --custom-source ./bmad-bgreat-suite
 ```
+
+Add `--modules bmm --tools claude-code --directory . --yes` (or your own tool
+IDs) for a non-interactive install. `--directory .` is needed on installer
+versions before v6.12.2, which otherwise stop at the directory prompt. The
+installer marks custom modules as unverified: they have not been reviewed by
+the BMad team.
+
+**Existing installs.** If `_bmad/` already exists, the installer menu defaults
+to **Quick Update**, which does not resolve `--custom-source`: the command
+finishes without error and installs nothing. Select **Modify BMAD
+Installation** at the menu. For a non-interactive run, add `--action update`.
+This applies to both commands above.
+
+**Installed modules can be removed.** On an existing installation, running
+`--custom-source` without `--yes` and without `--modules` keeps only `core` and
+the custom modules, and removes other installed modules (such as `bmm`)
+without asking. `--modules` sets the exact module set, so it also removes any
+module it does not list. To keep your installed modules, either add `--yes`
+and leave out `--modules` (installed modules are kept and the defaults are
+added), or pass `--modules` listing every module to keep.
+
+There is no npm package; install from GitHub or a local clone.
+
+### BMad v7 preview
+
+Not yet supported. `npx skills add combsmith/bmad-bgreat-suite` copies the
+skills, but v7's `bmad setup` does not recognize them as a module: it asks
+none of the configuration questions below and does not write
+`_bmad/bgr/config.yaml`, which every workflow loads first. Use v6 until the
+suite is ported to v7's module format.
 
 ## Configuration
 
@@ -137,7 +176,7 @@ Each workflow follows BMAD's micro-file architecture: a `workflow.md` orchestrat
 
 ## Requirements
 
-- [BMad Method](https://github.com/bmad-code-org/BMAD-METHOD) v6+
+- [BMad Method](https://github.com/bmad-code-org/BMAD-METHOD) v6.7 or later (v7 preview not yet supported)
 - Core module (required)
 - BMad Method module (recommended — enables CA and IR cross-references)
 

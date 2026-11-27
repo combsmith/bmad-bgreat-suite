@@ -50,7 +50,7 @@ Look for `{bgr_artifacts}/production-readiness-checklist.md`:
 
 ### 3. Load Context from Completed Workflow Artifacts
 
-Check `{bgr_artifacts}/` for previously completed BGreat workflow outputs:
+Check `{bgr_artifacts}/` for previously completed BHappy Ops workflow outputs:
 
 - `*observability*.md` — If completed, note SLO targets, metrics definitions, and alerting thresholds that resilience testing should validate
 - `*incident-response*.md` — If completed, note severity classification and runbook procedures that game days should exercise
